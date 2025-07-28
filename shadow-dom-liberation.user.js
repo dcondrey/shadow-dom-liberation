@@ -18,11 +18,11 @@
 // @homepageURL       https://github.com/dcondrey/shadow-dom-liberation
 // @website           https://github.com/dcondrey/shadow-dom-liberation
 // @source            https://github.com/dcondrey/shadow-dom-liberation
-// @icon              https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.png
-// @iconURL           https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.png
-// @defaulticon       https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.png
-// @icon64            https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon64.png
-// @icon64URL         https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon64.png
+// @icon              https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.svg
+// @iconURL           https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.svg
+// @defaulticon       https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon.svg
+// @icon64            https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon64.svg
+// @icon64URL         https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/icons/icon64.svg
 // @supportURL        https://github.com/dcondrey/shadow-dom-liberation/issues
 // @updateURL         https://github.com/dcondrey/shadow-dom-liberation/raw/main/shadow-dom-liberation.user.js
 // @downloadURL       https://github.com/dcondrey/shadow-dom-liberation/raw/main/shadow-dom-liberation.user.js
