@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Background -->
+  <rect width="256" height="256" rx="32" fill="#1a1a2e"/>
+  
+  <!-- Shadow layer (darker DOM) -->
+  <g opacity="0.6">
+    <rect x="40" y="60" width="80" height="80" rx="8" fill="#0f0f23" stroke="#4a4a6a" stroke-width="2"/>
+    <rect x="50" y="70" width="60" height="10" rx="2" fill="#4a4a6a"/>
+    <rect x="50" y="85" width="40" height="10" rx="2" fill="#4a4a6a"/>
+    <rect x="50" y="100" width="50" height="10" rx="2" fill="#4a4a6a"/>
+    <rect x="50" y="115" width="30" height="10" rx="2" fill="#4a4a6a"/>
+  </g>
+  
+  <!-- Liberation effect (breaking chains) -->
+  <g>
+    <!-- Chain links breaking -->
+    <path d="M 120 100 Q 130 90, 140 100" fill="none" stroke="#ff6b6b" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+    <path d="M 135 100 Q 145 110, 155 100" fill="none" stroke="#ff6b6b" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Break effect -->
+    <circle cx="135" cy="100" r="8" fill="#ffd93d">
+      <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Liberated layer (free DOM) -->
+  <g>
+    <rect x="136" y="60" width="80" height="80" rx="8" fill="#f8f9fa" stroke="#4ecdc4" stroke-width="3"/>
+    <rect x="146" y="70" width="60" height="10" rx="2" fill="#4ecdc4"/>
+    <rect x="146" y="85" width="40" height="10" rx="2" fill="#4ecdc4"/>
+    <rect x="146" y="100" width="50" height="10" rx="2" fill="#4ecdc4"/>
+    <rect x="146" y="115" width="30" height="10" rx="2" fill="#4ecdc4"/>
+    
+    <!-- Selection/interaction indicators -->
+    <rect x="146" y="85" width="40" height="10" rx="2" fill="#4ecdc4" opacity="0.3"/>
+    <rect x="190" y="83" width="2" height="14" fill="#4ecdc4">
+      <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  
+  <!-- Freedom sparkles -->
+  <g>
+    <circle cx="200" cy="80" r="2" fill="#ffd93d">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="180" cy="120" r="2" fill="#ffd93d">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="75" r="2" fill="#ffd93d">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Title text -->
+  <text x="128" y="180" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#f8f9fa">Shadow DOM</text>
+  <text x="128" y="205" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#4ecdc4">Liberation</text>
+</svg>
