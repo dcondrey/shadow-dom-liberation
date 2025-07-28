@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow DOM Liberation - Test Suite</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .controls button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .controls button:hover {
+            background: #2980b9;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .test-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            background: white;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-card.pass {
+            border-color: #27ae60;
+            background: #f1f8f4;
+        }
+        
+        .test-card.fail {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        
+        .test-card.pending {
+            border-color: #f39c12;
+            background: #fef9e7;
+        }
+        
+        .test-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .test-card p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .test-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .test-status.pass {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .test-status.fail {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .test-status.pending {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .filter-tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        #testFrame {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Shadow DOM Liberation Test Suite</h1>
+        <p>Comprehensive testing for content restriction bypass</p>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <button onclick="runAllTests()">🚀 Run All Tests</button>
+            <button onclick="exportResults()">📥 Export Results</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="totalTests">0</div>
+                    <div class="label">Total Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="passedTests">0</div>
+                    <div class="label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="failedTests">0</div>
+                    <div class="label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="pendingTests">0</div>
+                    <div class="label">Pending</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterTests('all')">All Tests</div>
+            <div class="filter-tab" onclick="filterTests('manual')">Manual</div>
+            <div class="filter-tab" onclick="filterTests('advanced')">Advanced</div>
+            <div class="filter-tab" onclick="filterTests('pass')">✅ Passed</div>
+            <div class="filter-tab" onclick="filterTests('fail')">❌ Failed</div>
+            <div class="filter-tab" onclick="filterTests('pending')">⏳ Pending</div>
+        </div>
+        
+        <div class="test-section" id="manualTests">
+            <h2>Manual Test Cases</h2>
+            <div class="test-grid">
+                <div class="test-card pending" data-test="manual/right-click-disabled.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Right-Click Disabled</h3>
+                    <p>Tests context menu prevention using oncontextmenu handlers</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/text-selection-blocked.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Text Selection Blocked</h3>
+                    <p>Tests text selection prevention with CSS and JavaScript</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/copy-paste-disabled.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Copy/Paste Disabled</h3>
+                    <p>Tests clipboard operation restrictions</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/drag-disabled.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Drag Disabled</h3>
+                    <p>Tests drag operation blocking on images and text</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/devtools-detection.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>DevTools Detection</h3>
+                    <p>Tests developer tools detection and countermeasures</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/overlay-protection.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Overlay Protection</h3>
+                    <p>Tests transparent overlay-based content blocking</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/iframe-restrictions.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Iframe Restrictions</h3>
+                    <p>Tests content protection within iframes</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/shadow-dom-protection.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Shadow DOM Protection</h3>
+                    <p>Tests content isolation using Shadow DOM</p>
+                </div>
+                
+                <div class="test-card pending" data-test="manual/combined-restrictions.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Combined Restrictions</h3>
+                    <p>Tests multiple restriction techniques together</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section" id="advancedTests">
+            <h2>Advanced Test Cases</h2>
+            <div class="test-grid">
+                <div class="test-card pending" data-test="advanced/mutation-observer-guard.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>MutationObserver Guard</h3>
+                    <p>Tests protection using MutationObserver monitoring</p>
+                </div>
+                
+                <div class="test-card pending" data-test="advanced/event-capture-trap.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Event Capture Trap</h3>
+                    <p>Tests event capture phase blocking techniques</p>
+                </div>
+                
+                <div class="test-card pending" data-test="advanced/css-pointer-events.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>CSS Pointer Events</h3>
+                    <p>Tests CSS-based interaction blocking</p>
+                </div>
+                
+                <div class="test-card pending" data-test="advanced/javascript-vm-isolation.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>JavaScript VM Isolation</h3>
+                    <p>Tests VM-based content protection</p>
+                </div>
+                
+                <div class="test-card pending" data-test="advanced/timing-attack-detection.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Timing Attack Detection</h3>
+                    <p>Tests timing-based script detection</p>
+                </div>
+                
+                <div class="test-card pending" data-test="advanced/fingerprint-detection.html">
+                    <div class="test-status pending">⏳</div>
+                    <h3>Fingerprint Detection</h3>
+                    <p>Tests userscript fingerprinting attempts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Shadow DOM Liberation Test Suite v1.0 | Click on any test to run it individually</p>
+    </div>
+    
+    <iframe id="testFrame" width="100%" height="600"></iframe>
+    
+    <script>
+        // Test results storage
+        const testResults = JSON.parse(localStorage.getItem('sdl-test-results') || '{}');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            attachTestClickHandlers();
+            loadPreviousResults();
+        });
+        
+        function attachTestClickHandlers() {
+            document.querySelectorAll('.test-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const testPath = card.getAttribute('data-test');
+                    window.open(testPath, '_blank');
+                });
+            });
+        }
+        
+        function runAllTests() {
+            const tests = document.querySelectorAll('.test-card');
+            let index = 0;
+            
+            function runNextTest() {
+                if (index < tests.length) {
+                    const test = tests[index];
+                    const testPath = test.getAttribute('data-test');
+                    
+                    // Mark as running
+                    updateTestStatus(testPath, 'running');
+                    
+                    // Open test in new window
+                    const testWindow = window.open(testPath, '_blank');
+                    
+                    // Move to next test after delay
+                    setTimeout(() => {
+                        index++;
+                        runNextTest();
+                    }, 2000);
+                } else {
+                    alert('All tests launched! Check each window for results.');
+                }
+            }
+            
+            runNextTest();
+        }
+        
+        function updateTestStatus(testPath, status) {
+            const card = document.querySelector(`[data-test="${testPath}"]`);
+            if (!card) return;
+            
+            // Remove existing status classes
+            card.classList.remove('pass', 'fail', 'pending');
+            const statusIcon = card.querySelector('.test-status');
+            statusIcon.classList.remove('pass', 'fail', 'pending');
+            
+            // Add new status
+            if (status === 'pass') {
+                card.classList.add('pass');
+                statusIcon.classList.add('pass');
+                statusIcon.textContent = '✅';
+            } else if (status === 'fail') {
+                card.classList.add('fail');
+                statusIcon.classList.add('fail');
+                statusIcon.textContent = '❌';
+            } else {
+                card.classList.add('pending');
+                statusIcon.classList.add('pending');
+                statusIcon.textContent = '⏳';
+            }
+            
+            // Save result
+            testResults[testPath] = status;
+            localStorage.setItem('sdl-test-results', JSON.stringify(testResults));
+            
+            updateStats();
+        }
+        
+        function updateStats() {
+            const total = document.querySelectorAll('.test-card').length;
+            const passed = document.querySelectorAll('.test-card.pass').length;
+            const failed = document.querySelectorAll('.test-card.fail').length;
+            const pending = total - passed - failed;
+            
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('failedTests').textContent = failed;
+            document.getElementById('pendingTests').textContent = pending;
+        }
+        
+        function filterTests(filter) {
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter test cards
+            const allCards = document.querySelectorAll('.test-card');
+            const manualSection = document.getElementById('manualTests');
+            const advancedSection = document.getElementById('advancedTests');
+            
+            if (filter === 'all') {
+                allCards.forEach(card => card.style.display = '');
+                manualSection.style.display = '';
+                advancedSection.style.display = '';
+            } else if (filter === 'manual') {
+                manualSection.style.display = '';
+                advancedSection.style.display = 'none';
+            } else if (filter === 'advanced') {
+                manualSection.style.display = 'none';
+                advancedSection.style.display = '';
+            } else {
+                // Status filters
+                manualSection.style.display = '';
+                advancedSection.style.display = '';
+                allCards.forEach(card => {
+                    card.style.display = card.classList.contains(filter) ? '' : 'none';
+                });
+            }
+        }
+        
+        function exportResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                testResults: testResults,
+                summary: {
+                    total: document.getElementById('totalTests').textContent,
+                    passed: document.getElementById('passedTests').textContent,
+                    failed: document.getElementById('failedTests').textContent,
+                    pending: document.getElementById('pendingTests').textContent
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sdl-test-results-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function clearResults() {
+            if (confirm('Clear all test results?')) {
+                localStorage.removeItem('sdl-test-results');
+                location.reload();
+            }
+        }
+        
+        function loadPreviousResults() {
+            Object.entries(testResults).forEach(([testPath, status]) => {
+                updateTestStatus(testPath, status);
+            });
+        }
+        
+        // Listen for test result messages from test pages
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'test-result') {
+                updateTestStatus(event.data.testPath, event.data.status);
+            }
+        });
+    </script>
+</body>
+</html>

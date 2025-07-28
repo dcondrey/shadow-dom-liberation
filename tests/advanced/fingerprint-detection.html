@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Userscript Fingerprint Detection</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .fingerprint-scanner {
+            background: #0d47a1;
+            color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .fingerprint-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .fingerprint-check {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .check-name {
+            font-weight: bold;
+            color: #64b5f6;
+            margin-bottom: 5px;
+        }
+        
+        .check-status {
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .check-status.clean {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .check-status.detected {
+            background: #f44336;
+            color: white;
+        }
+        
+        .check-status.suspicious {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .detection-score {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        }
+        
+        .score-label {
+            font-size: 18px;
+            color: #90caf9;
+            margin-top: 10px;
+        }
+        
+        .fingerprint-details {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .detail-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tampering-alert {
+            background: #b71c1c;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .tampering-alert.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Userscript Fingerprinting & Detection</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test attempts to detect the presence of userscripts through various fingerprinting techniques.</p>
+        <p><strong>Expected behavior:</strong> The userscript should operate without leaving detectable fingerprints.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Fingerprint scanner active
+    </div>
+    
+    <div class="technique-details">
+        <strong>Detection techniques used:</strong><br>
+        - Function toString() checking<br>
+        - Prototype chain analysis<br>
+        - Stack trace inspection<br>
+        - Global object enumeration<br>
+        - DOM mutation signatures<br>
+        - Performance characteristics<br>
+        - Event listener inspection<br>
+        - Property descriptor analysis
+    </div>
+    
+    <div class="tampering-alert" id="tamperingAlert">
+        🚨 USERSCRIPT TAMPERING DETECTED 🚨
+    </div>
+    
+    <div class="fingerprint-scanner">
+        <h3>Fingerprint Analysis Scanner</h3>
+        
+        <div class="detection-score">
+            <div class="score-display" id="detectionScore">0%</div>
+            <div class="score-label">Tampering Probability</div>
+        </div>
+        
+        <div class="fingerprint-grid">
+            <div class="fingerprint-check">
+                <div class="check-name">Function Integrity</div>
+                <div id="functionCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Prototype Chain</div>
+                <div id="prototypeCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Stack Traces</div>
+                <div id="stackCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Global Pollution</div>
+                <div id="globalCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">DOM Signatures</div>
+                <div id="domCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Event Listeners</div>
+                <div id="eventCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Property Descriptors</div>
+                <div id="propertyCheck" class="check-status clean">Checking...</div>
+            </div>
+            
+            <div class="fingerprint-check">
+                <div class="check-name">Timing Patterns</div>
+                <div id="timingCheck" class="check-status clean">Checking...</div>
+            </div>
+        </div>
+        
+        <div class="fingerprint-details" id="fingerprintDetails">
+            <strong>Detection Log:</strong><br>
+        </div>
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Fingerprint-Protected Content</h2>
+        
+        <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <p>This content is protected by fingerprint detection.</p>
+            <button onclick="runFingerprintScan()">Run Full Fingerprint Scan</button>
+            <p>Secret: <code id="protectedSecret">FINGERPRINT-LOCKED</code></p>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Wait for automatic fingerprint scan<br>
+           2. Click "Run Full Fingerprint Scan"<br>
+           3. Check detection score and individual checks<br>
+           4. Monitor the detection log<br>
+           5. If score stays low with userscript active, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Fingerprint detection system
+        const fingerprintDetector = {
+            score: 0,
+            maxScore: 100,
+            checks: {},
+            
+            // Store original references
+            originals: {
+                toString: Function.prototype.toString,
+                addEventListener: EventTarget.prototype.addEventListener,
+                querySelector: Document.prototype.querySelector,
+                getAttribute: Element.prototype.getAttribute,
+                defineProperty: Object.defineProperty,
+                getOwnPropertyDescriptor: Object.getOwnPropertyDescriptor,
+                keys: Object.keys
+            },
+            
+            log(message, severity = 'info') {
+                const details = document.getElementById('fingerprintDetails');
+                const entry = document.createElement('div');
+                entry.className = 'detail-entry';
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                details.appendChild(entry);
+                details.scrollTop = details.scrollHeight;
+                
+                testUtils.console.log(`Fingerprint: ${message}`);
+            },
+            
+            updateScore(points, reason) {
+                this.score = Math.min(this.score + points, this.maxScore);
+                document.getElementById('detectionScore').textContent = `${this.score}%`;
+                
+                if (this.score > 50) {
+                    document.getElementById('tamperingAlert').classList.add('active');
+                }
+                
+                this.log(`Score +${points}: ${reason}`, 'warning');
+            },
+            
+            checkFunctionIntegrity() {
+                let suspicious = 0;
+                
+                // Check if toString has been modified
+                if (Function.prototype.toString !== this.originals.toString) {
+                    suspicious++;
+                    this.updateScore(15, 'Function.prototype.toString modified');
+                }
+                
+                // Check native functions
+                const nativeFuncs = [
+                    { name: 'addEventListener', func: EventTarget.prototype.addEventListener },
+                    { name: 'querySelector', func: Document.prototype.querySelector },
+                    { name: 'getAttribute', func: Element.prototype.getAttribute }
+                ];
+                
+                nativeFuncs.forEach(({ name, func }) => {
+                    try {
+                        const str = this.originals.toString.call(func);
+                        if (!str.includes('[native code]')) {
+                            suspicious++;
+                            this.updateScore(10, `${name} is not native`);
+                        }
+                    } catch (e) {
+                        suspicious++;
+                        this.updateScore(5, `${name} toString() threw error`);
+                    }
+                });
+                
+                this.updateCheck('functionCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkPrototypeChain() {
+                let suspicious = 0;
+                
+                // Check for prototype modifications
+                const prototypes = [
+                    { obj: Element.prototype, name: 'Element' },
+                    { obj: Document.prototype, name: 'Document' },
+                    { obj: Event.prototype, name: 'Event' }
+                ];
+                
+                prototypes.forEach(({ obj, name }) => {
+                    const props = Object.getOwnPropertyNames(obj);
+                    
+                    // Check for unexpected properties
+                    props.forEach(prop => {
+                        if (prop.startsWith('_') || prop.includes('userscript')) {
+                            suspicious++;
+                            this.updateScore(10, `Suspicious property on ${name}: ${prop}`);
+                        }
+                    });
+                });
+                
+                this.updateCheck('prototypeCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkStackTraces() {
+                let suspicious = 0;
+                
+                try {
+                    // Generate stack trace
+                    const err = new Error();
+                    const stack = err.stack;
+                    
+                    // Look for userscript indicators
+                    const suspiciousPatterns = [
+                        'userscript',
+                        'tampermonkey',
+                        'greasemonkey',
+                        'violentmonkey',
+                        'extension://',
+                        'moz-extension://',
+                        'chrome-extension://'
+                    ];
+                    
+                    suspiciousPatterns.forEach(pattern => {
+                        if (stack.toLowerCase().includes(pattern)) {
+                            suspicious++;
+                            this.updateScore(20, `Stack trace contains: ${pattern}`);
+                        }
+                    });
+                } catch (e) {
+                    this.log('Stack trace check failed');
+                }
+                
+                this.updateCheck('stackCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkGlobalPollution() {
+                let suspicious = 0;
+                
+                // Check for userscript globals
+                const suspiciousGlobals = [
+                    'GM',
+                    'GM_info',
+                    'GM_xmlhttpRequest',
+                    'unsafeWindow',
+                    'cloneInto',
+                    'exportFunction',
+                    'shadowDomLiberation'
+                ];
+                
+                suspiciousGlobals.forEach(global => {
+                    if (global in window) {
+                        suspicious++;
+                        this.updateScore(15, `Global variable found: ${global}`);
+                    }
+                });
+                
+                // Check window properties
+                const windowProps = Object.getOwnPropertyNames(window);
+                windowProps.forEach(prop => {
+                    if (prop.includes('userscript') || prop.includes('monkey')) {
+                        suspicious++;
+                        this.updateScore(10, `Suspicious window property: ${prop}`);
+                    }
+                });
+                
+                this.updateCheck('globalCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkDOMSignatures() {
+                let suspicious = 0;
+                
+                // Look for userscript-injected elements
+                const suspiciousSelectors = [
+                    '[data-userscript]',
+                    '[data-tampermonkey]',
+                    '.userscript-style',
+                    '#userscript-config',
+                    'style[data-source="userscript"]'
+                ];
+                
+                suspiciousSelectors.forEach(selector => {
+                    try {
+                        if (document.querySelector(selector)) {
+                            suspicious++;
+                            this.updateScore(10, `Found element: ${selector}`);
+                        }
+                    } catch (e) {
+                        // Ignore selector errors
+                    }
+                });
+                
+                // Check for style injection patterns
+                document.querySelectorAll('style').forEach(style => {
+                    if (!style.hasAttribute('data-emotion') && 
+                        !style.hasAttribute('data-styled') &&
+                        style.textContent.includes('!important')) {
+                        const importantCount = (style.textContent.match(/!important/g) || []).length;
+                        if (importantCount > 5) {
+                            suspicious++;
+                            this.updateScore(5, 'Suspicious style injection detected');
+                        }
+                    }
+                });
+                
+                this.updateCheck('domCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkEventListeners() {
+                let suspicious = 0;
+                
+                // Override addEventListener temporarily to detect calls
+                const originalAdd = EventTarget.prototype.addEventListener;
+                let listenerCount = 0;
+                
+                EventTarget.prototype.addEventListener = function(...args) {
+                    listenerCount++;
+                    return originalAdd.apply(this, args);
+                };
+                
+                // Wait and check
+                setTimeout(() => {
+                    EventTarget.prototype.addEventListener = originalAdd;
+                    
+                    if (listenerCount > 20) {
+                        suspicious++;
+                        this.updateScore(5, `High event listener count: ${listenerCount}`);
+                    }
+                }, 100);
+                
+                this.updateCheck('eventCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkPropertyDescriptors() {
+                let suspicious = 0;
+                
+                // Check for modified property descriptors
+                const propsToCheck = [
+                    { obj: document.body, prop: 'oncontextmenu' },
+                    { obj: document.body, prop: 'onselectstart' },
+                    { obj: Element.prototype, prop: 'style' }
+                ];
+                
+                propsToCheck.forEach(({ obj, prop }) => {
+                    try {
+                        const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+                        if (descriptor && descriptor.get && descriptor.get.toString().includes('function')) {
+                            const getterStr = descriptor.get.toString();
+                            if (!getterStr.includes('[native code]')) {
+                                suspicious++;
+                                this.updateScore(10, `Non-native getter on ${prop}`);
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore errors
+                    }
+                });
+                
+                this.updateCheck('propertyCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            checkTimingPatterns() {
+                let suspicious = 0;
+                
+                // Measure DOM operation timing
+                const measurements = [];
+                
+                for (let i = 0; i < 10; i++) {
+                    const start = performance.now();
+                    document.querySelectorAll('*').length;
+                    const duration = performance.now() - start;
+                    measurements.push(duration);
+                }
+                
+                const avg = measurements.reduce((a, b) => a + b) / measurements.length;
+                
+                // Check for abnormal timing
+                if (avg > 5) {
+                    suspicious++;
+                    this.updateScore(5, `Slow DOM queries: ${avg.toFixed(2)}ms avg`);
+                }
+                
+                this.updateCheck('timingCheck', suspicious === 0);
+                return suspicious === 0;
+            },
+            
+            updateCheck(checkId, passed) {
+                const element = document.getElementById(checkId);
+                element.className = 'check-status';
+                
+                if (passed) {
+                    element.classList.add('clean');
+                    element.textContent = 'Clean';
+                } else {
+                    element.classList.add('detected');
+                    element.textContent = 'Detected';
+                }
+            },
+            
+            runFullScan() {
+                this.score = 0;
+                this.log('Starting full fingerprint scan...');
+                
+                // Run all checks
+                this.checkFunctionIntegrity();
+                this.checkPrototypeChain();
+                this.checkStackTraces();
+                this.checkGlobalPollution();
+                this.checkDOMSignatures();
+                this.checkEventListeners();
+                this.checkPropertyDescriptors();
+                this.checkTimingPatterns();
+                
+                // Final verdict
+                if (this.score === 0) {
+                    testUtils.updateStatus(true, 'No userscript fingerprints detected');
+                    document.getElementById('protectedSecret').textContent = 'FINGERPRINT-PASSED-789';
+                } else if (this.score < 30) {
+                    testUtils.updateStatus('partial', 'Minor fingerprints detected');
+                } else {
+                    testUtils.updateStatus(false, 'Userscript fingerprints detected');
+                }
+                
+                this.log(`Scan complete. Total score: ${this.score}%`);
+                
+                return this.score === 0;
+            }
+        };
+        
+        // Run fingerprint scan
+        window.runFingerprintScan = function() {
+            fingerprintDetector.runFullScan();
+        };
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking fingerprint detection bypass...');
+            
+            // Run fingerprint scan
+            const undetected = fingerprintDetector.runFullScan();
+            
+            if (undetected) {
+                testUtils.console.success('Userscript operates without detectable fingerprints!');
+            } else {
+                testUtils.console.info(`Detection score: ${fingerprintDetector.score}%`);
+            }
+        };
+        
+        // Auto-scan periodically
+        setInterval(() => {
+            if (!window.sdlFingerprintBypass) {
+                fingerprintDetector.runFullScan();
+            }
+        }, 10000);
+        
+        // Initial scan after delay
+        setTimeout(() => {
+            fingerprintDetector.runFullScan();
+        }, 2000);
+        
+        testUtils.console.info('Fingerprint detection system initialized');
+    </script>
+</body>
+</html>

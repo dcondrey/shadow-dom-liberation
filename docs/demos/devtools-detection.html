@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTools Detection Demo - Shadow DOM Liberation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f3f4f6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-area {
+            background: #f9fafb;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            min-height: 300px;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background: #4f46e5;
+        }
+        
+        .status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+        
+        .status.active {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .status.disabled {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .secret-content {
+            background: #1e293b;
+            color: #10b981;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            margin: 1rem 0;
+        }
+        
+        .hidden-warning {
+            background: #dc2626;
+            color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            display: none;
+        }
+        
+        .devtools-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .devtools-indicator.closed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .devtools-indicator.open {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .blur {
+            filter: blur(5px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Developer Tools Detection Demo</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Note:</strong> This demo shows how websites detect DevTools. 
+            Press F12 to open DevTools and see the effect.
+        </div>
+        
+        <button onclick="toggleDetection()">Toggle DevTools Detection</button>
+        <div class="status active" id="status">DevTools Detection: ACTIVE</div>
+        
+        <div class="demo-area" id="demoArea">
+            <h2>Protected Content Area</h2>
+            
+            <div id="protectedContent">
+                <p>This content is visible when DevTools are closed.</p>
+                
+                <div class="secret-content">
+                    <pre>SECRET_API_KEY = "sk_live_1234567890abcdef"
+DATABASE_PASSWORD = "ultra_secure_pass_2024"
+ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"</pre>
+                </div>
+                
+                <p>Sensitive information that websites try to hide from developers:</p>
+                <ul>
+                    <li>API endpoints and keys</li>
+                    <li>Internal configuration</li>
+                    <li>Debug information</li>
+                    <li>Hidden form fields</li>
+                </ul>
+            </div>
+            
+            <div class="hidden-warning" id="hiddenWarning">
+                <h2>🚫 DevTools Detected!</h2>
+                <p>Content has been hidden for security reasons.</p>
+                <p>Close DevTools to view the content again.</p>
+            </div>
+        </div>
+        
+        <p><a href="../demo.html">← Back to all demos</a></p>
+    </div>
+    
+    <div class="devtools-indicator closed" id="devtoolsIndicator">
+        DevTools: CLOSED
+    </div>
+    
+    <script>
+        let detectionActive = true;
+        let checkInterval;
+        
+        // DevTools detection methods
+        const devtools = { open: false };
+        const threshold = 160;
+        
+        function detectDevTools() {
+            if (!detectionActive) return;
+            
+            // Method 1: Window size difference
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    onDevToolsOpen();
+                }
+            } else {
+                if (devtools.open) {
+                    devtools.open = false;
+                    onDevToolsClose();
+                }
+            }
+        }
+        
+        function onDevToolsOpen() {
+            const content = document.getElementById('protectedContent');
+            const warning = document.getElementById('hiddenWarning');
+            const indicator = document.getElementById('devtoolsIndicator');
+            
+            if (detectionActive) {
+                content.classList.add('blur');
+                warning.style.display = 'block';
+            }
+            
+            indicator.textContent = 'DevTools: OPEN';
+            indicator.className = 'devtools-indicator open';
+        }
+        
+        function onDevToolsClose() {
+            const content = document.getElementById('protectedContent');
+            const warning = document.getElementById('hiddenWarning');
+            const indicator = document.getElementById('devtoolsIndicator');
+            
+            content.classList.remove('blur');
+            warning.style.display = 'none';
+            
+            indicator.textContent = 'DevTools: CLOSED';
+            indicator.className = 'devtools-indicator closed';
+        }
+        
+        function toggleDetection() {
+            const status = document.getElementById('status');
+            
+            detectionActive = !detectionActive;
+            
+            if (detectionActive) {
+                status.textContent = 'DevTools Detection: ACTIVE';
+                status.className = 'status active';
+                if (devtools.open) {
+                    onDevToolsOpen();
+                }
+            } else {
+                status.textContent = 'DevTools Detection: DISABLED';
+                status.className = 'status disabled';
+                // Always show content when detection is disabled
+                const content = document.getElementById('protectedContent');
+                const warning = document.getElementById('hiddenWarning');
+                content.classList.remove('blur');
+                warning.style.display = 'none';
+            }
+        }
+        
+        // Start detection
+        checkInterval = setInterval(detectDevTools, 500);
+        
+        // Method 2: Console timing
+        let element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                if (detectionActive && !devtools.open) {
+                    devtools.open = true;
+                    onDevToolsOpen();
+                }
+            }
+        });
+        
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            clearInterval(checkInterval);
+        });
+    </script>
+</body>
+</html>

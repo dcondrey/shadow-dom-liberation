@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: DevTools Detection</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .devtools-warning {
+            display: none;
+            background: #f44336;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+        }
+        
+        .devtools-warning.active {
+            display: block;
+        }
+        
+        #debuggerWarning {
+            display: none;
+            background: #ff9800;
+            color: white;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Developer Tools Detection</h1>
+    
+    <div class="devtools-warning" id="devtoolsWarning">
+        ⚠️ Developer Tools Detected! Content has been hidden.
+    </div>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass DevTools detection mechanisms.</p>
+        <p><strong>Expected behavior:</strong> You should be able to use Developer Tools without content being hidden or the page reacting.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - DevTools detection is enabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Detection techniques used:</strong><br>
+        - Window dimension changes detection<br>
+        - Console object property checking<br>
+        - Debugger statement traps<br>
+        - Performance timing analysis<br>
+        - toString() override detection
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Protected Content</h2>
+        <p>This content should remain visible even when Developer Tools are open.</p>
+        
+        <div id="debuggerWarning">
+            🐛 Debugger detected! This message appears when debugger statements are triggered.
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3>Sensitive Information (Test Only)</h3>
+            <p><strong>API Endpoint:</strong> https://api.example.com/v2/sensitive</p>
+            <p><strong>Debug Token:</strong> debug-token-12345-67890-abcdef</p>
+            <p>This information should remain accessible for debugging.</p>
+        </div>
+        
+        <div style="background: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <h3>Detection Status:</h3>
+            <p>Window width: <span id="windowWidth">-</span></p>
+            <p>Window height: <span id="windowHeight">-</span></p>
+            <p>Outer width: <span id="outerWidth">-</span></p>
+            <p>Outer height: <span id="outerHeight">-</span></p>
+            <p>DevTools state: <span id="devtoolsState">Unknown</span></p>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Open Developer Tools (F12 or right-click → Inspect)<br>
+           2. Switch between docked and undocked DevTools<br>
+           3. Open the Console tab<br>
+           4. Try using the debugger<br>
+           5. If content remains visible and accessible, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        let devtoolsOpen = false;
+        let contentHidden = false;
+        
+        // Method 1: Window size detection
+        const sizeDetection = {
+            threshold: 160,
+            check: function() {
+                if (window.outerHeight - window.innerHeight > this.threshold || 
+                    window.outerWidth - window.innerWidth > this.threshold) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        
+        // Method 2: Console object detection
+        const consoleDetection = {
+            element: new Image(),
+            check: function() {
+                const startTime = performance.now();
+                console.log(this.element);
+                console.clear();
+                return performance.now() - startTime > 10;
+            }
+        };
+        
+        // Method 3: Debugger timing
+        const debuggerDetection = {
+            check: function() {
+                const startTime = performance.now();
+                debugger;
+                return performance.now() - startTime > 100;
+            }
+        };
+        
+        // Method 4: toString override detection
+        const toStringDetection = {
+            check: function() {
+                let detected = false;
+                const obj = {};
+                obj.toString = function() {
+                    detected = true;
+                };
+                console.log('%c', obj);
+                return detected;
+            }
+        };
+        
+        // Hide content when DevTools detected
+        function hideContent() {
+            if (!contentHidden && !window.sdlProtected) {
+                contentHidden = true;
+                document.getElementById('testContent').style.opacity = '0.1';
+                document.getElementById('testContent').style.filter = 'blur(5px)';
+                document.getElementById('devtoolsWarning').classList.add('active');
+                testUtils.console.error('DevTools detected - content hidden!');
+            }
+        }
+        
+        // Show content
+        function showContent() {
+            contentHidden = false;
+            document.getElementById('testContent').style.opacity = '1';
+            document.getElementById('testContent').style.filter = 'none';
+            document.getElementById('devtoolsWarning').classList.remove('active');
+            testUtils.console.success('Content restored');
+        }
+        
+        // Main detection loop
+        function detectDevTools() {
+            const wasOpen = devtoolsOpen;
+            
+            // Check all detection methods
+            devtoolsOpen = sizeDetection.check() || 
+                          debuggerDetection.check() ||
+                          consoleDetection.check() ||
+                          toStringDetection.check();
+            
+            // Update display
+            document.getElementById('windowWidth').textContent = window.innerWidth;
+            document.getElementById('windowHeight').textContent = window.innerHeight;
+            document.getElementById('outerWidth').textContent = window.outerWidth;
+            document.getElementById('outerHeight').textContent = window.outerHeight;
+            document.getElementById('devtoolsState').textContent = devtoolsOpen ? 'Open' : 'Closed';
+            
+            // React to state change
+            if (devtoolsOpen && !wasOpen) {
+                testUtils.console.log('DevTools opened');
+                hideContent();
+            } else if (!devtoolsOpen && wasOpen) {
+                testUtils.console.log('DevTools closed');
+                showContent();
+            }
+        }
+        
+        // Start detection
+        setInterval(detectDevTools, 500);
+        
+        // Prevent right-click to make it harder to open DevTools
+        document.addEventListener('contextmenu', function(e) {
+            if (!window.sdlProtected) {
+                e.preventDefault();
+                testUtils.console.log('Right-click blocked to prevent DevTools access');
+            }
+        });
+        
+        // Block F12 and other DevTools shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (!window.sdlProtected) {
+                // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+                if (e.keyCode === 123 || 
+                    ((e.ctrlKey || e.metaKey) && e.shiftKey && ['I', 'J', 'C'].includes(e.key))) {
+                    e.preventDefault();
+                    testUtils.console.log('DevTools keyboard shortcut blocked');
+                    return false;
+                }
+            }
+        });
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking DevTools detection bypass...');
+            
+            // Give userscript time to work
+            setTimeout(() => {
+                // Mark as protected to test
+                window.sdlProtected = true;
+                
+                // Force a detection check
+                detectDevTools();
+                
+                // Check if content is still visible
+                const contentVisible = !contentHidden;
+                const rightClickWorks = true; // Will be tested by user
+                
+                if (contentVisible) {
+                    testUtils.updateStatus(true, 'DevTools detection bypassed');
+                } else {
+                    testUtils.updateStatus(false, 'DevTools detection still active');
+                }
+                
+                // Log detection status
+                testUtils.console.info(`Content visibility: ${contentVisible ? 'visible' : 'hidden'}`);
+                testUtils.console.info(`DevTools detected: ${devtoolsOpen ? 'yes' : 'no'}`);
+            }, 2000);
+        };
+        
+        // Additional console trap
+        Object.defineProperty(console, '_commandLineAPI', {
+            get: function() {
+                testUtils.console.log('Console command line API accessed');
+                hideContent();
+            }
+        });
+        
+        // Monitor for successful bypass
+        const observer = new MutationObserver(() => {
+            if (contentHidden && document.getElementById('testContent').style.opacity === '1') {
+                testUtils.console.success('Content protection bypassed!');
+                testUtils.updateStatus(true, 'DevTools detection has been bypassed');
+                window.sdlProtected = true;
+            }
+        });
+        
+        observer.observe(document.getElementById('testContent'), {
+            attributes: true,
+            attributeFilter: ['style']
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Demos - Shadow DOM Liberation</title>
+    <meta name="description" content="Interactive demonstrations showing how Shadow DOM Liberation removes website restrictions. Test text selection, right-click, copy protection and more.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/demo.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/icon.svg">
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Shadow DOM Liberation - Interactive Demos",
+        "description": "Interactive demonstrations of website content restrictions and how Shadow DOM Liberation bypasses them",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Shadow DOM Liberation",
+            "url": "https://dcondrey.github.io/shadow-dom-liberation/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <a href="#main-content" class="skip-link" tabindex="0">Skip to main content</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; color: inherit;" aria-label="Shadow DOM Liberation home">
+                    <img src="assets/images/icon.svg" alt="" class="nav-logo" aria-hidden="true">
+                    <span>Shadow DOM Liberation</span>
+                </a>
+            </div>
+            <ul class="nav-menu" role="list">
+                <li><a href="index.html" tabindex="0">Home</a></li>
+                <li><a href="#demos" tabindex="0">Demos</a></li>
+                <li><a href="installation.html" tabindex="0">Install</a></li>
+                <li><a href="https://github.com/dcondrey/shadow-dom-liberation" target="_blank" rel="noopener noreferrer" tabindex="0">GitHub<span class="sr-only"> (opens in new tab)</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="demo-hero" role="banner">
+        <div class="container">
+            <h1>Interactive Demos</h1>
+            <p class="hero-subtitle">
+                Experience how websites restrict your ability to interact with content,
+                and see how Shadow DOM Liberation restores your freedom.
+            </p>
+            <div class="demo-status" id="userscriptStatus" role="status" aria-live="polite">
+                <span class="status-indicator" id="statusIndicator" aria-hidden="true"></span>
+                <span id="statusText">Checking userscript status...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+    
+    <!-- Demos Section -->
+    <section id="demos" class="section" aria-labelledby="demos-heading">
+        <div class="container">
+            <h1 id="demos-heading" class="sr-only">Interactive Restriction Demos</h1>
+            
+            <!-- Text Selection Demo -->
+            <article class="demo-section" aria-labelledby="text-selection-heading">
+                <h2 id="text-selection-heading">1. Text Selection Blocking</h2>
+                <p>Many websites prevent you from selecting text. Try it below:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleTextSelection()" class="btn btn-small">Toggle Protection</button>
+                        <span class="protection-status" id="textSelectionStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area no-select" id="textSelectionDemo">
+                        <h3>Try to Select This Text</h3>
+                        <p>The quick brown fox jumps over the lazy dog. This classic pangram contains every letter
+                            of the alphabet and is commonly used for testing fonts and text rendering.</p>
+
+                        <blockquote>
+                            "The only way to do great work is to love what you do." - Steve Jobs
+                        </blockquote>
+
+                        <p>Important information: <code>API-KEY-12345-67890</code></p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Right-Click Demo -->
+            <article class="demo-section" aria-labelledby="right-click-heading">
+                <h2 id="right-click-heading">2. Right-Click Context Menu</h2>
+                <p>Right-clicking is often disabled to prevent saving images or inspecting elements:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleRightClick()" class="btn btn-small">Toggle Protection</button>
+                        <span class="protection-status" id="rightClickStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area" id="rightClickDemo" oncontextmenu="return false">
+                        <p>Right-click anywhere in this area to test the context menu.</p>
+
+                        <img src="assets/images/demo-image.svg" alt="Protected Image"
+                            style="width: 200px; margin: 20px 0;" oncontextmenu="return false">
+
+                        <p>You should be able to:</p>
+                        <ul>
+                            <li>Save images</li>
+                            <li>Inspect elements</li>
+                            <li>View page source</li>
+                            <li>Use all browser features</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Copy/Paste Demo -->
+            <div class="demo-section">
+                <h2>3. Copy & Paste Restrictions</h2>
+                <p>Some sites block copying to prevent content theft:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleCopyPaste()" class="btn btn-small">Toggle Protection</button>
+                        <span class="protection-status" id="copyPasteStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area" id="copyPasteDemo" oncopy="return false" oncut="return false">
+                        <p>Try to copy this text using Ctrl+C (Cmd+C on Mac) or right-click → Copy.</p>
+
+                        <div class="code-block">
+                            <pre><code>function liberateContent() {
+    // This code should be copyable
+    const restrictions = document.querySelectorAll('[oncopy]');
+    restrictions.forEach(el => el.removeAttribute('oncopy'));
+    return 'Freedom restored!';
+}</code></pre>
+                        </div>
+
+                        <input type="text" placeholder="Try pasting here after copying"
+                            style="width: 100%; padding: 10px; margin-top: 20px;">
+                    </div>
+                </div>
+            </article>
+
+            <!-- Drag Operations Demo -->
+            <div class="demo-section">
+                <h2>4. Image Drag Protection</h2>
+                <p>Images are often protected from dragging to prevent easy saving:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleDrag()" class="btn btn-small">Toggle Protection</button>
+                        <span class="protection-status" id="dragStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area" id="dragDemo">
+                        <p>Try to drag these images:</p>
+
+                        <div class="image-grid">
+                            <img src="assets/images/demo-image.svg" alt="Protected Image 1" draggable="false"
+                                ondragstart="return false" class="protected-image">
+
+                            <img src="assets/images/icon.svg" alt="Protected Image 2" draggable="false"
+                                ondragstart="return false" class="protected-image" style="width: 100px;">
+                        </div>
+
+                        <div class="drop-zone" id="dropZone">
+                            Drop images here to test
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- DevTools Detection Demo -->
+            <div class="demo-section">
+                <h2>5. Developer Tools Detection</h2>
+                <p>Some sites detect when you open DevTools and hide content:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleDevToolsDetection()" class="btn btn-small">Toggle Protection</button>
+                        <span class="protection-status" id="devtoolsStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area" id="devtoolsDemo">
+                        <div id="devtoolsContent">
+                            <h3>Protected Content</h3>
+                            <p>This content may disappear when DevTools are opened.</p>
+                            <p>Secret: <code>DEVTOOLS-SECRET-999</code></p>
+                        </div>
+
+                        <div id="devtoolsWarning" style="display: none;">
+                            <h3>⚠️ DevTools Detected!</h3>
+                            <p>Content has been hidden for security.</p>
+                        </div>
+
+                        <p class="demo-note">Press F12 to open DevTools and see the effect.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Advanced Protection Demo -->
+            <div class="demo-section">
+                <h2>6. Advanced Combined Protection</h2>
+                <p>Real websites often combine multiple protection techniques:</p>
+
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <button onclick="toggleAllProtections()" class="btn btn-small">Toggle All Protections</button>
+                        <span class="protection-status" id="allProtectionsStatus">Protection: ON</span>
+                    </div>
+
+                    <div class="demo-area ultra-protected" id="combinedDemo">
+                        <div class="overlay-protection"></div>
+                        <div class="protected-content">
+                            <h3>Ultra-Protected Content</h3>
+                            <p>This area combines all protection methods:</p>
+                            <ul>
+                                <li>❌ No text selection</li>
+                                <li>❌ No right-click</li>
+                                <li>❌ No copying</li>
+                                <li>❌ No image dragging</li>
+                                <li>❌ Overlay protection</li>
+                                <li>❌ CSS pointer-events: none</li>
+                            </ul>
+
+                            <img src="assets/images/demo-image.svg" alt="Ultra Protected" class="ultra-protected-image">
+
+                            <p>Secret code: <code>ULTIMATE-PROTECTION-777</code></p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Test Results Section -->
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Test Your Browser</h2>
+            <p class="section-subtitle">Run automated tests to see which protections are active:</p>
+
+            <div class="test-runner">
+                <button onclick="runAllTests()" class="btn btn-primary btn-large">🧪 Run All Tests</button>
+
+                <div class="test-results" id="testResults" style="display: none;">
+                    <h3>Test Results:</h3>
+                    <div class="results-grid" id="resultsGrid"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section">
+        <div class="container text-center">
+            <h2>Ready to Free Your Content?</h2>
+            <p class="mb-4">Install Shadow DOM Liberation and browse the web without restrictions.</p>
+            <div class="hero-actions">
+                <a href="installation.html" class="btn btn-primary btn-large">Install Now</a>
+                <a href="tests/test-runner.html" class="btn btn-secondary">Full Test Suite</a>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shadow DOM Liberation. Use responsibly.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/demo.js"></script>
+</body>
+
+</html>

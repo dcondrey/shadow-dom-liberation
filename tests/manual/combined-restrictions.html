@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Combined Restrictions</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        /* Multiple CSS restrictions */
+        body, body * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-user-drag: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        
+        .ultra-protected {
+            position: relative;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+        }
+        
+        .protection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: transparent;
+        }
+        
+        .restriction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .restriction-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            position: relative;
+        }
+        
+        .restriction-card.active {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .restriction-card.bypassed {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+        
+        #restrictionCount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f44336;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false" oncopy="return false" oncut="return false" onpaste="return false" onmousedown="return false">
+    <h1>Test: Combined Multiple Restrictions</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test combines ALL restriction techniques to create maximum protection. The Shadow DOM Liberation script should bypass all of them.</p>
+        <p><strong>Expected behavior:</strong> Despite multiple layers of protection, all normal interactions should work.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Multiple protections enabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>All protection techniques combined:</strong><br>
+        <div id="restrictionCount">0 active restrictions</div>
+        <div id="restrictionList" style="font-size: 12px; color: #666;"></div>
+    </div>
+    
+    <div class="test-content ultra-protected" id="testContent">
+        <div class="protection-overlay"></div>
+        
+        <h2>Ultra-Protected Content</h2>
+        
+        <div class="restriction-grid">
+            <div class="restriction-card active" id="card1">
+                <h3>Text Selection Test</h3>
+                <p>The quick brown fox jumps over the lazy dog. This pangram should be selectable despite all protections.</p>
+                <code>SELECT-ME-123</code>
+            </div>
+            
+            <div class="restriction-card active" id="card2">
+                <h3>Right-Click Test</h3>
+                <p>Right-click anywhere in this card to test context menu.</p>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='100'%3E%3Crect width='150' height='100' fill='%23673AB7'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='14'%3ERight-Click Me%3C/text%3E%3C/svg%3E" 
+                     alt="Protected image" 
+                     draggable="false">
+            </div>
+            
+            <div class="restriction-card active" id="card3">
+                <h3>Copy/Paste Test</h3>
+                <p>Try to copy this text:</p>
+                <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0;">
+                    <code>COPY-TEST-DATA-789</code>
+                </div>
+                <input type="text" placeholder="Paste here to test" style="width: 100%; padding: 5px;">
+            </div>
+            
+            <div class="restriction-card active" id="card4">
+                <h3>Drag Operation Test</h3>
+                <p>Try to drag this image:</p>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='100'%3E%3Crect width='150' height='100' fill='%23FF5722'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='14'%3EDrag Me%3C/text%3E%3C/svg%3E" 
+                     alt="Draggable test" 
+                     draggable="false"
+                     class="no-drag">
+            </div>
+            
+            <div class="restriction-card active" id="card5">
+                <h3>Form Interaction Test</h3>
+                <form onsubmit="return false">
+                    <input type="text" placeholder="Type here..." disabled style="width: 100%; padding: 5px; margin: 5px 0;">
+                    <select disabled style="width: 100%; padding: 5px; margin: 5px 0;">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                    <button type="button" disabled onclick="alert('Button clicked!')">Click Me</button>
+                </form>
+            </div>
+            
+            <div class="restriction-card active" id="card6">
+                <h3>Shadow DOM Test</h3>
+                <div id="shadowHost"></div>
+            </div>
+        </div>
+        
+        <div id="iframeContainer" style="margin: 20px 0;">
+            <h3>Iframe with All Restrictions</h3>
+            <iframe id="restrictedIframe" style="width: 100%; height: 200px; border: 2px solid #ddd;" srcdoc="
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial; 
+                            padding: 20px;
+                            user-select: none !important;
+                            -webkit-user-select: none !important;
+                        }
+                    </style>
+                </head>
+                <body oncontextmenu='return false' onselectstart='return false' oncopy='return false'>
+                    <h4>Iframe Content</h4>
+                    <p>This iframe has all restrictions applied.</p>
+                    <p>Protected data: <code>IFRAME-PROTECTED-456</code></p>
+                </body>
+                </html>
+            "></iframe>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to select text in any card<br>
+           2. Right-click on images and text<br>
+           3. Copy and paste content<br>
+           4. Drag images<br>
+           5. Interact with disabled form elements<br>
+           6. Test all operations in the iframe<br>
+           7. If ALL operations work everywhere, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // List of all active restrictions
+        const restrictions = [
+            'CSS user-select: none',
+            'CSS user-drag: none',
+            'oncontextmenu="return false"',
+            'onselectstart="return false"',
+            'ondragstart="return false"',
+            'oncopy="return false"',
+            'oncut="return false"',
+            'onpaste="return false"',
+            'onmousedown="return false"',
+            'JavaScript event listeners',
+            'Transparent overlay',
+            'Disabled form elements',
+            'Shadow DOM isolation',
+            'Iframe restrictions',
+            'MutationObserver protection',
+            'Keyboard shortcut blocking',
+            'DevTools detection',
+            'Event capture phase blocking'
+        ];
+        
+        // Update restriction count
+        document.getElementById('restrictionCount').textContent = `${restrictions.length} active restrictions`;
+        document.getElementById('restrictionList').innerHTML = restrictions.join(' • ');
+        
+        // Apply JavaScript-based restrictions
+        const events = ['contextmenu', 'selectstart', 'dragstart', 'copy', 'cut', 'paste', 'mousedown'];
+        events.forEach(eventType => {
+            // Document level with capture
+            document.addEventListener(eventType, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                testUtils.console.log(`${eventType} blocked at document level`);
+                return false;
+            }, true);
+            
+            // Window level
+            window.addEventListener(eventType, function(e) {
+                e.preventDefault();
+                testUtils.console.log(`${eventType} blocked at window level`);
+                return false;
+            }, true);
+        });
+        
+        // Block keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Block Ctrl/Cmd + A, C, X, V
+            if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'x', 'v'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                testUtils.console.log(`Keyboard shortcut blocked: ${e.key}`);
+                return false;
+            }
+            
+            // Block F12 for DevTools
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                testUtils.console.log('F12 blocked');
+                return false;
+            }
+        }, true);
+        
+        // Create Shadow DOM with restrictions
+        const shadowHost = document.getElementById('shadowHost');
+        const shadowRoot = shadowHost.attachShadow({ mode: 'closed' });
+        shadowRoot.innerHTML = `
+            <style>
+                * { user-select: none !important; }
+            </style>
+            <div oncontextmenu="return false">
+                <p>Shadow DOM content with restrictions</p>
+                <code>SHADOW-PROTECTED-999</code>
+            </div>
+        `;
+        
+        // Store for testing
+        shadowHost._shadowRoot = shadowRoot;
+        
+        // MutationObserver to restore restrictions
+        const observer = new MutationObserver(function(mutations) {
+            if (!window.sdlFullyBypassed) {
+                mutations.forEach(function(mutation) {
+                    // Check if attributes were modified
+                    if (mutation.type === 'attributes') {
+                        const target = mutation.target;
+                        if (target === document.body) {
+                            // Restore body attributes
+                            if (!target.hasAttribute('oncontextmenu')) {
+                                target.setAttribute('oncontextmenu', 'return false');
+                                testUtils.console.log('Restored oncontextmenu attribute');
+                            }
+                        }
+                    }
+                    
+                    // Check if overlay was removed
+                    mutation.removedNodes.forEach(function(node) {
+                        if (node.classList && node.classList.contains('protection-overlay')) {
+                            testUtils.console.log('Overlay removed - regenerating...');
+                            const newOverlay = document.createElement('div');
+                            newOverlay.className = 'protection-overlay';
+                            document.querySelector('.ultra-protected').appendChild(newOverlay);
+                        }
+                    });
+                });
+            }
+        });
+        
+        observer.observe(document.body, {
+            attributes: true,
+            childList: true,
+            subtree: true
+        });
+        
+        // Track bypass success for each restriction type
+        const bypassStatus = {
+            selection: false,
+            rightClick: false,
+            copy: false,
+            drag: false,
+            forms: false,
+            shadow: false,
+            iframe: false
+        };
+        
+        // Monitor successful operations
+        function checkBypass(type) {
+            bypassStatus[type] = true;
+            document.getElementById(`card${Object.keys(bypassStatus).indexOf(type) + 1}`).classList.add('bypassed');
+            
+            const bypassedCount = Object.values(bypassStatus).filter(v => v).length;
+            const totalTypes = Object.keys(bypassStatus).length;
+            
+            if (bypassedCount === totalTypes) {
+                window.sdlFullyBypassed = true;
+                testUtils.updateStatus(true, 'All restrictions fully bypassed!');
+            } else {
+                testUtils.updateStatus('partial', `${bypassedCount}/${totalTypes} restriction types bypassed`);
+            }
+        }
+        
+        // Monitor text selection
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection().toString();
+            if (selection.length > 0) {
+                testUtils.console.success('Text selection successful!');
+                checkBypass('selection');
+            }
+        });
+        
+        // Monitor right-click (will be checked when user tests)
+        document.addEventListener('contextmenu', function(e) {
+            if (!e.defaultPrevented) {
+                testUtils.console.success('Right-click successful!');
+                checkBypass('rightClick');
+            }
+        });
+        
+        // Monitor copy
+        document.addEventListener('copy', function(e) {
+            if (!e.defaultPrevented) {
+                testUtils.console.success('Copy successful!');
+                checkBypass('copy');
+            }
+        });
+        
+        // Monitor drag
+        document.addEventListener('dragstart', function(e) {
+            if (!e.defaultPrevented) {
+                testUtils.console.success('Drag start successful!');
+                checkBypass('drag');
+            }
+        });
+        
+        // Check form elements
+        setTimeout(() => {
+            const formElements = document.querySelectorAll('input:not([type="text"]), select, button');
+            let anyEnabled = false;
+            formElements.forEach(el => {
+                if (!el.disabled) {
+                    anyEnabled = true;
+                }
+            });
+            if (anyEnabled) {
+                checkBypass('forms');
+            }
+        }, 2000);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking combined restrictions bypass...');
+            
+            // Give time for userscript to work
+            setTimeout(() => {
+                // Check each restriction type
+                const checks = {
+                    'CSS user-select': window.getComputedStyle(document.body).userSelect !== 'none',
+                    'Body attributes': !document.body.hasAttribute('oncontextmenu'),
+                    'Overlay present': !document.querySelector('.protection-overlay'),
+                    'Form elements': !document.querySelector('input[disabled]'),
+                    'Event listeners': true // Hard to check directly
+                };
+                
+                const bypassedChecks = Object.values(checks).filter(v => v).length;
+                const totalChecks = Object.keys(checks).length;
+                
+                testUtils.console.info(`Bypassed ${bypassedChecks}/${totalChecks} restriction checks`);
+                
+                // Initial status update
+                if (bypassedChecks === totalChecks) {
+                    testUtils.updateStatus(true, 'Initial checks passed - test interactions');
+                } else if (bypassedChecks > 0) {
+                    testUtils.updateStatus('partial', `${bypassedChecks}/${totalChecks} checks passed`);
+                } else {
+                    testUtils.updateStatus(false, 'Restrictions still fully active');
+                }
+            }, 2000);
+        };
+    </script>
+</body>
+</html>

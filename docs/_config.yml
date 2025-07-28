@@ -1,0 +1,56 @@
+# Jekyll configuration for GitHub Pages
+title: Shadow DOM Liberation
+description: A powerful userscript that removes content restrictions from websites
+url: https://dcondrey.github.io
+baseurl: /shadow-dom-liberation
+
+# Theme (using default GitHub Pages theme)
+theme: null
+
+# Exclude files from build
+exclude:
+  - README.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: null
+
+# GitHub metadata
+github:
+  repository_url: https://github.com/dcondrey/shadow-dom-liberation
+  repository_name: shadow-dom-liberation
+
+# SEO
+author: Shadow DOM Liberation Contributors
+social:
+  name: Shadow DOM Liberation
+  links:
+    - https://github.com/dcondrey/shadow-dom-liberation
+
+# Analytics (optional - add your tracking ID)
+google_analytics:
+
+# Compress HTML
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false

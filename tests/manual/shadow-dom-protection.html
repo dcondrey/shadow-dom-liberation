@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Shadow DOM Protection</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .shadow-host {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #9C27B0;
+            border-radius: 8px;
+            background: #f5f5f5;
+        }
+        
+        .shadow-info {
+            background: #E1BEE7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        #shadowStatus {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .status-item {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: #f5f5f5;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Shadow DOM Content Isolation</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass content protection using Shadow DOM isolation.</p>
+        <p><strong>Expected behavior:</strong> You should be able to interact with content inside Shadow DOM roots as if it were regular DOM content.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Content isolated in Shadow DOM
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - Closed Shadow DOM roots<br>
+        - Open Shadow DOM with event blocking<br>
+        - Nested Shadow DOM structures<br>
+        - Custom element encapsulation<br>
+        - Shadow DOM style isolation
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Shadow DOM Test Cases</h2>
+        
+        <div id="shadowHost1" class="shadow-host">
+            <div class="shadow-info">
+                <strong>Test 1:</strong> Open Shadow Root with restrictions
+            </div>
+        </div>
+        
+        <div id="shadowHost2" class="shadow-host">
+            <div class="shadow-info">
+                <strong>Test 2:</strong> Closed Shadow Root (inaccessible via JavaScript)
+            </div>
+        </div>
+        
+        <div id="shadowHost3" class="shadow-host">
+            <div class="shadow-info">
+                <strong>Test 3:</strong> Nested Shadow DOM with custom elements
+            </div>
+        </div>
+        
+        <protected-content id="customElement1"></protected-content>
+        
+        <div id="shadowStatus">
+            <h3>Shadow DOM Detection Status:</h3>
+            <div id="statusContainer"></div>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to select text inside the purple bordered areas<br>
+           2. Right-click on content within Shadow DOM<br>
+           3. Try to copy text from shadow roots<br>
+           4. Click buttons inside shadow DOM<br>
+           5. Inspect shadow DOM content in DevTools<br>
+           6. If all interactions work, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Define custom element with shadow DOM
+        class ProtectedContent extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'closed' });
+                
+                shadow.innerHTML = `
+                    <style>
+                        :host {
+                            display: block;
+                            margin: 20px 0;
+                            padding: 20px;
+                            border: 2px solid #FF5722;
+                            border-radius: 8px;
+                            background: #FFF3E0;
+                        }
+                        * {
+                            user-select: none !important;
+                            -webkit-user-select: none !important;
+                        }
+                        .content {
+                            padding: 15px;
+                            background: white;
+                            border-radius: 4px;
+                        }
+                    </style>
+                    <div class="shadow-info">
+                        <strong>Test 4:</strong> Custom Element with Closed Shadow DOM
+                    </div>
+                    <div class="content" oncontextmenu="return false" onselectstart="return false">
+                        <h3>Protected Custom Element</h3>
+                        <p>This content is inside a custom element's closed shadow DOM.</p>
+                        <p>Secret code: <code>SHADOW-SECRET-456</code></p>
+                        <button onclick="alert('Shadow button clicked!')">Shadow Button</button>
+                    </div>
+                `;
+                
+                // Store shadow root reference (normally wouldn't do this)
+                this._shadowRoot = shadow;
+                
+                // Add event blocking
+                shadow.addEventListener('copy', e => e.preventDefault(), true);
+                shadow.addEventListener('contextmenu', e => e.preventDefault(), true);
+                shadow.addEventListener('selectstart', e => e.preventDefault(), true);
+            }
+        }
+        
+        // Register custom element
+        customElements.define('protected-content', ProtectedContent);
+        
+        // Create shadow DOM structures
+        function createShadowDOM() {
+            // Test 1: Open Shadow Root
+            const host1 = document.getElementById('shadowHost1');
+            const shadow1 = host1.attachShadow({ mode: 'open' });
+            shadow1.innerHTML = `
+                <style>
+                    * {
+                        user-select: none;
+                        -webkit-user-select: none;
+                    }
+                    .shadow-content {
+                        padding: 15px;
+                        background: #E8EAF6;
+                        border-radius: 4px;
+                    }
+                </style>
+                <div class="shadow-content" oncontextmenu="return false">
+                    <h3>Open Shadow DOM Content</h3>
+                    <p>This text is inside an open shadow root but still protected.</p>
+                    <p>Try to copy: <strong>OPEN-SHADOW-123</strong></p>
+                    <input type="text" placeholder="Try typing in shadow DOM..." style="padding: 5px; width: 200px;">
+                </div>
+            `;
+            
+            // Add restrictions
+            shadow1.addEventListener('copy', e => e.preventDefault());
+            shadow1.addEventListener('selectstart', e => e.preventDefault());
+            
+            // Test 2: Closed Shadow Root
+            const host2 = document.getElementById('shadowHost2');
+            const shadow2 = host2.attachShadow({ mode: 'closed' });
+            shadow2.innerHTML = `
+                <style>
+                    :host {
+                        display: block;
+                    }
+                    .shadow-content {
+                        padding: 15px;
+                        background: #FCE4EC;
+                        border-radius: 4px;
+                    }
+                    * {
+                        user-select: none !important;
+                        -webkit-user-drag: none !important;
+                    }
+                </style>
+                <div class="shadow-content">
+                    <h3>Closed Shadow DOM Content</h3>
+                    <p>This is inside a closed shadow root - completely isolated.</p>
+                    <p>Hidden data: <code>CLOSED-SHADOW-789</code></p>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='100'%3E%3Crect width='150' height='100' fill='%23E91E63'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='14'%3EShadow Image%3C/text%3E%3C/svg%3E" 
+                         alt="Shadow DOM image" 
+                         draggable="false">
+                </div>
+            `;
+            
+            // Store closed shadow reference for testing (normally inaccessible)
+            host2._shadowRoot = shadow2;
+            
+            // Test 3: Nested Shadow DOM
+            const host3 = document.getElementById('shadowHost3');
+            const shadow3 = host3.attachShadow({ mode: 'open' });
+            shadow3.innerHTML = `
+                <style>
+                    .outer-shadow {
+                        padding: 15px;
+                        background: #F3E5F5;
+                        border-radius: 4px;
+                    }
+                    .nested-host {
+                        margin-top: 10px;
+                        padding: 10px;
+                        border: 1px dashed #9C27B0;
+                    }
+                </style>
+                <div class="outer-shadow">
+                    <h3>Outer Shadow DOM</h3>
+                    <p>This contains another shadow root:</p>
+                    <div id="nestedHost" class="nested-host"></div>
+                </div>
+            `;
+            
+            // Create nested shadow
+            const nestedHost = shadow3.getElementById('nestedHost');
+            const nestedShadow = nestedHost.attachShadow({ mode: 'open' });
+            nestedShadow.innerHTML = `
+                <style>
+                    * { user-select: none !important; }
+                    .nested-content {
+                        padding: 10px;
+                        background: #EDE7F6;
+                        border-radius: 4px;
+                    }
+                </style>
+                <div class="nested-content" oncontextmenu="return false">
+                    <h4>Nested Shadow Content</h4>
+                    <p>Deeply nested and protected text.</p>
+                    <button onclick="alert('Nested shadow button!')">Click Me</button>
+                </div>
+            `;
+            
+            testUtils.console.info('Shadow DOM structures created');
+        }
+        
+        // Create shadow DOM on load
+        createShadowDOM();
+        
+        // Monitor shadow DOM status
+        function updateShadowStatus() {
+            const statusContainer = document.getElementById('statusContainer');
+            statusContainer.innerHTML = '';
+            
+            const hosts = [
+                { id: 'shadowHost1', name: 'Open Shadow Host' },
+                { id: 'shadowHost2', name: 'Closed Shadow Host' },
+                { id: 'shadowHost3', name: 'Nested Shadow Host' },
+                { id: 'customElement1', name: 'Custom Element' }
+            ];
+            
+            hosts.forEach(({ id, name }) => {
+                const host = document.getElementById(id);
+                const shadowRoot = host.shadowRoot || host._shadowRoot;
+                
+                const status = document.createElement('div');
+                status.className = 'status-item';
+                
+                if (shadowRoot) {
+                    const mode = shadowRoot.mode || 'closed';
+                    const accessible = !!host.shadowRoot;
+                    status.innerHTML = `${name}: ${mode} mode, ${accessible ? 'accessible' : 'inaccessible'}`;
+                    
+                    // Check if content is selectable
+                    try {
+                        const content = shadowRoot.querySelector('*');
+                        if (content) {
+                            const computed = window.getComputedStyle(content);
+                            const selectable = computed.userSelect !== 'none';
+                            status.innerHTML += `, selection: ${selectable ? 'enabled' : 'disabled'}`;
+                        }
+                    } catch (e) {
+                        status.innerHTML += ', cannot check selection';
+                    }
+                } else {
+                    status.innerHTML = `${name}: No shadow root found`;
+                }
+                
+                statusContainer.appendChild(status);
+            });
+        }
+        
+        // Update status periodically
+        setInterval(updateShadowStatus, 1000);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking Shadow DOM restriction bypass...');
+            
+            let shadowsAccessible = 0;
+            let restrictionsBypassed = 0;
+            const totalShadows = 4;
+            
+            // Check each shadow root
+            const checkShadow = (host, shadowRoot, name) => {
+                if (!shadowRoot) {
+                    testUtils.console.error(`${name}: No shadow root`);
+                    return;
+                }
+                
+                shadowsAccessible++;
+                
+                try {
+                    // Check if restrictions are bypassed
+                    const content = shadowRoot.querySelector('[oncontextmenu], [onselectstart]');
+                    const hasRestrictions = !!content;
+                    
+                    // Check CSS restrictions
+                    const allElements = shadowRoot.querySelectorAll('*');
+                    let cssRestricted = false;
+                    
+                    allElements.forEach(el => {
+                        const computed = window.getComputedStyle(el);
+                        if (computed.userSelect === 'none') {
+                            cssRestricted = true;
+                        }
+                    });
+                    
+                    if (!hasRestrictions && !cssRestricted) {
+                        restrictionsBypassed++;
+                        testUtils.console.success(`${name}: Restrictions bypassed`);
+                    } else {
+                        testUtils.console.info(`${name}: Still restricted`);
+                    }
+                    
+                    // Try to select text programmatically
+                    const textNode = shadowRoot.querySelector('p');
+                    if (textNode) {
+                        const range = document.createRange();
+                        range.selectNodeContents(textNode);
+                        const selection = shadowRoot.getSelection ? shadowRoot.getSelection() : window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        
+                        if (selection.toString().length > 0) {
+                            testUtils.console.success(`${name}: Text selection works`);
+                        }
+                    }
+                } catch (e) {
+                    testUtils.console.error(`${name}: ${e.message}`);
+                }
+            };
+            
+            // Check all shadow roots
+            const host1 = document.getElementById('shadowHost1');
+            checkShadow(host1, host1.shadowRoot, 'Open Shadow');
+            
+            const host2 = document.getElementById('shadowHost2');
+            checkShadow(host2, host2._shadowRoot, 'Closed Shadow');
+            
+            const host3 = document.getElementById('shadowHost3');
+            if (host3.shadowRoot) {
+                checkShadow(host3, host3.shadowRoot, 'Nested Shadow Outer');
+                const nestedHost = host3.shadowRoot.getElementById('nestedHost');
+                if (nestedHost && nestedHost.shadowRoot) {
+                    checkShadow(nestedHost, nestedHost.shadowRoot, 'Nested Shadow Inner');
+                }
+            }
+            
+            const customEl = document.getElementById('customElement1');
+            checkShadow(customEl, customEl._shadowRoot, 'Custom Element Shadow');
+            
+            // Update status
+            if (restrictionsBypassed === totalShadows) {
+                testUtils.updateStatus(true, 'All Shadow DOM restrictions bypassed');
+            } else if (restrictionsBypassed > 0) {
+                testUtils.updateStatus('partial', `${restrictionsBypassed}/${totalShadows} shadow roots liberated`);
+            } else {
+                testUtils.updateStatus(false, 'Shadow DOM restrictions still active');
+            }
+        };
+        
+        // Monitor for successful interactions in shadow DOM
+        document.addEventListener('click', function(e) {
+            // Check if click originated from shadow DOM
+            const path = e.composedPath();
+            for (let element of path) {
+                if (element instanceof ShadowRoot) {
+                    testUtils.console.success('Click event from Shadow DOM detected!');
+                    testUtils.updateStatus(true, 'Shadow DOM interaction working!');
+                    break;
+                }
+            }
+        }, true);
+    </script>
+</body>
+</html>

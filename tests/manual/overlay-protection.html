@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Overlay Protection</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .content-container {
+            position: relative;
+        }
+        
+        .protective-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.001); /* Nearly invisible */
+            cursor: not-allowed;
+        }
+        
+        .protective-overlay.visible {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px dashed red;
+        }
+        
+        .toggle-visibility {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .toggle-visibility:hover {
+            background: #1976D2;
+        }
+        
+        .protected-content {
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .protected-image {
+            max-width: 100%;
+            display: block;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Overlay-Based Content Protection</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass transparent overlay protection that prevents interaction with content.</p>
+        <p><strong>Expected behavior:</strong> You should be able to click, select, and interact with all content beneath the overlay.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Content is protected by overlay
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - Transparent overlay with high z-index<br>
+        - Pointer-events blocking<br>
+        - Multiple layered overlays<br>
+        - Dynamic overlay regeneration<br>
+        - Event capture on overlay
+    </div>
+    
+    <button class="toggle-visibility" onclick="toggleOverlayVisibility()">
+        Toggle Overlay Visibility (for testing)
+    </button>
+    
+    <div class="test-content" id="testContent">
+        <h2>Protected Content Area</h2>
+        
+        <div class="content-container" id="container1">
+            <div class="protective-overlay" id="overlay1"></div>
+            <div class="protected-content">
+                <h3>Interactive Elements</h3>
+                <p>Try to interact with these elements:</p>
+                
+                <button onclick="alert('Button clicked!')">Click Me!</button>
+                
+                <input type="text" placeholder="Try typing here..." style="margin: 10px 0; padding: 5px;">
+                
+                <label style="display: block; margin: 10px 0;">
+                    <input type="checkbox"> Check this box
+                </label>
+                
+                <a href="#test" onclick="testUtils.console.success('Link clicked!'); return false;">
+                    Click this link
+                </a>
+            </div>
+        </div>
+        
+        <div class="content-container" id="container2" style="margin-top: 20px;">
+            <div class="protective-overlay" id="overlay2"></div>
+            <div class="protected-content">
+                <h3>Selectable Text</h3>
+                <p>Try to select this text: The quick brown fox jumps over the lazy dog. 
+                   This text should be selectable after the overlay protection is bypassed.</p>
+                
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%239C27B0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='18'%3EProtected Image - Try to right-click%3C/text%3E%3C/svg%3E" 
+                     alt="Protected image" 
+                     class="protected-image"
+                     oncontextmenu="testUtils.console.success('Right-click on image worked!'); return true;">
+            </div>
+        </div>
+        
+        <div class="content-container" id="container3" style="margin-top: 20px;">
+            <div class="protective-overlay" id="overlay3"></div>
+            <div class="protective-overlay" id="overlay4" style="z-index: 10000;"></div>
+            <div class="protected-content">
+                <h3>Double-Layer Protection</h3>
+                <p>This content has multiple overlay layers for extra protection.</p>
+                <textarea placeholder="Try to type in this textarea..." rows="3" style="width: 100%;"></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Click the "Toggle Overlay Visibility" button to see the protective overlays<br>
+           2. Try clicking buttons and links<br>
+           3. Try selecting text<br>
+           4. Try typing in input fields<br>
+           5. Try right-clicking on images<br>
+           6. If all interactions work normally, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        let overlaysVisible = false;
+        
+        // Toggle overlay visibility for testing
+        function toggleOverlayVisibility() {
+            overlaysVisible = !overlaysVisible;
+            document.querySelectorAll('.protective-overlay').forEach(overlay => {
+                overlay.classList.toggle('visible', overlaysVisible);
+            });
+            testUtils.console.info(`Overlays are now ${overlaysVisible ? 'visible' : 'invisible'}`);
+        }
+        
+        // Block all events on overlays
+        document.querySelectorAll('.protective-overlay').forEach((overlay, index) => {
+            // Block pointer events via CSS
+            overlay.style.pointerEvents = 'auto';
+            
+            // Block all mouse events
+            ['click', 'mousedown', 'mouseup', 'contextmenu', 'dblclick'].forEach(eventType => {
+                overlay.addEventListener(eventType, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    testUtils.console.log(`${eventType} blocked by overlay ${index + 1}`);
+                    return false;
+                }, true);
+            });
+            
+            // Block selection
+            overlay.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                testUtils.console.log(`Selection blocked by overlay ${index + 1}`);
+                return false;
+            });
+        });
+        
+        // Regenerate overlays if removed
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.removedNodes.forEach(function(node) {
+                    if (node.classList && node.classList.contains('protective-overlay')) {
+                        if (!window.sdlProtected) {
+                            testUtils.console.log('Overlay removed - regenerating...');
+                            const newOverlay = node.cloneNode(true);
+                            node.parentElement.appendChild(newOverlay);
+                            
+                            // Reattach event listeners
+                            ['click', 'mousedown', 'mouseup', 'contextmenu'].forEach(eventType => {
+                                newOverlay.addEventListener(eventType, function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return false;
+                                }, true);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Observe all containers
+        document.querySelectorAll('.content-container').forEach(container => {
+            observer.observe(container, { childList: true });
+        });
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking overlay protection bypass...');
+            
+            let overlaysDisabled = true;
+            let interactionWorks = false;
+            
+            // Check if overlays are still blocking
+            document.querySelectorAll('.protective-overlay').forEach((overlay, index) => {
+                const computed = window.getComputedStyle(overlay);
+                
+                // Check various bypass methods
+                const pointerEventsNone = computed.pointerEvents === 'none';
+                const displayNone = computed.display === 'none';
+                const visibilityHidden = computed.visibility === 'hidden';
+                const zIndexLowered = parseInt(computed.zIndex) < 0;
+                const removed = !document.contains(overlay);
+                
+                if (!pointerEventsNone && !displayNone && !visibilityHidden && !zIndexLowered && !removed) {
+                    overlaysDisabled = false;
+                }
+                
+                testUtils.console.info(`Overlay ${index + 1}: pointer-events=${computed.pointerEvents}, display=${computed.display}, visibility=${computed.visibility}, z-index=${computed.zIndex}`);
+            });
+            
+            // Test actual interaction
+            const button = document.querySelector('button[onclick*="alert"]');
+            if (button) {
+                // Try to click programmatically
+                try {
+                    const event = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    
+                    // Add listener to check if click reaches button
+                    button.addEventListener('click', function(e) {
+                        if (!e.defaultPrevented) {
+                            interactionWorks = true;
+                        }
+                    }, { once: true });
+                    
+                    button.dispatchEvent(event);
+                } catch (e) {
+                    testUtils.console.error('Click test failed: ' + e.message);
+                }
+            }
+            
+            // Mark as protected for regeneration check
+            window.sdlProtected = overlaysDisabled || interactionWorks;
+            
+            // Update status
+            if (overlaysDisabled && interactionWorks) {
+                testUtils.updateStatus(true, 'Overlay protection fully bypassed');
+            } else if (overlaysDisabled || interactionWorks) {
+                testUtils.updateStatus('partial', 'Overlay protection partially bypassed');
+            } else {
+                testUtils.updateStatus(false, 'Overlay protection still active');
+            }
+        };
+        
+        // Monitor successful interactions
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.protected-content') && !e.target.classList.contains('protective-overlay')) {
+                testUtils.console.success(`Interaction successful: clicked ${e.target.tagName}`);
+                testUtils.updateStatus(true, 'Overlay protection has been bypassed!');
+                window.sdlProtected = true;
+            }
+        }, true);
+        
+        // Check for text selection
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection().toString();
+            if (selection.length > 0 && document.querySelector('.protected-content').contains(window.getSelection().anchorNode)) {
+                testUtils.console.success('Text selection works under overlay!');
+                testUtils.updateStatus(true, 'Overlay protection has been bypassed!');
+            }
+        });
+    </script>
+</body>
+</html>

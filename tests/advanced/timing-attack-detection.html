@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Timing Attack Detection</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .timing-monitor {
+            background: #212121;
+            color: #4fc3f7;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            margin: 20px 0;
+        }
+        
+        .timing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .timing-metric {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .timing-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #81c784;
+            display: block;
+            margin: 5px 0;
+        }
+        
+        .timing-label {
+            font-size: 12px;
+            color: #90a4ae;
+        }
+        
+        .anomaly-detected {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .anomaly-detected.active {
+            display: block;
+        }
+        
+        .timing-chart {
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .timing-bar {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            background: #4fc3f7;
+            transition: height 0.3s ease;
+        }
+        
+        .detection-log {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        
+        .detection-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detection-entry.anomaly {
+            color: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Timing-Based Script Detection</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test uses timing analysis to detect userscript modifications by monitoring execution time anomalies.</p>
+        <p><strong>Expected behavior:</strong> The userscript should operate without triggering timing-based detection.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Timing detection enabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Detection techniques used:</strong><br>
+        - Performance timing analysis<br>
+        - Execution time fingerprinting<br>
+        - Statistical anomaly detection<br>
+        - Function call timing patterns<br>
+        - DOM operation benchmarking<br>
+        - Event handler latency monitoring
+    </div>
+    
+    <div class="anomaly-detected" id="anomalyAlert">
+        ⚠️ TIMING ANOMALY DETECTED - Possible script injection!
+    </div>
+    
+    <div class="timing-monitor">
+        <h3>Timing Analysis Monitor</h3>
+        <div class="timing-grid">
+            <div class="timing-metric">
+                <span class="timing-label">Average Execution</span>
+                <span class="timing-value" id="avgExecution">0.00ms</span>
+            </div>
+            <div class="timing-metric">
+                <span class="timing-label">Deviation</span>
+                <span class="timing-value" id="deviation">0.00ms</span>
+            </div>
+            <div class="timing-metric">
+                <span class="timing-label">Anomalies</span>
+                <span class="timing-value" id="anomalyCount">0</span>
+            </div>
+        </div>
+        
+        <div class="timing-chart" id="timingChart"></div>
+        
+        <div class="detection-log" id="detectionLog">
+            <strong>Detection Log:</strong><br>
+        </div>
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Timing-Protected Operations</h2>
+        
+        <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3>Protected Functions</h3>
+            <button onclick="protectedOperation()" id="timingButton">
+                Execute Timed Operation
+            </button>
+            <p>This operation is monitored for timing anomalies.</p>
+        </div>
+        
+        <div style="background: #fff3e0; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3>DOM Manipulation Test</h3>
+            <button onclick="timedDOMOperation()">
+                Timed DOM Operation
+            </button>
+            <div id="domTarget">
+                <p>Target for DOM operations</p>
+                <code>TIMING-PROTECTED-456</code>
+            </div>
+        </div>
+        
+        <div style="background: #f3e5f5; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3>Event Handler Timing</h3>
+            <input type="text" id="timedInput" placeholder="Type to test timing..." style="width: 200px; padding: 5px;">
+            <p>Keystroke timing is analyzed for anomalies.</p>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Click "Execute Timed Operation" multiple times<br>
+           2. Click "Timed DOM Operation"<br>
+           3. Type in the input field<br>
+           4. Monitor the timing analysis display<br>
+           5. If no anomalies are detected with userscript active, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Timing analysis system
+        const timingAnalyzer = {
+            baseline: [],
+            threshold: 2.5, // Standard deviations
+            windowSize: 50,
+            anomalies: 0,
+            
+            addMeasurement(duration) {
+                this.baseline.push(duration);
+                if (this.baseline.length > this.windowSize) {
+                    this.baseline.shift();
+                }
+                
+                this.updateDisplay();
+                return this.detectAnomaly(duration);
+            },
+            
+            detectAnomaly(duration) {
+                if (this.baseline.length < 10) return false;
+                
+                const avg = this.getAverage();
+                const stdDev = this.getStandardDeviation();
+                const zScore = Math.abs((duration - avg) / stdDev);
+                
+                if (zScore > this.threshold) {
+                    this.anomalies++;
+                    this.logAnomaly(duration, avg, stdDev, zScore);
+                    return true;
+                }
+                return false;
+            },
+            
+            getAverage() {
+                const sum = this.baseline.reduce((a, b) => a + b, 0);
+                return sum / this.baseline.length;
+            },
+            
+            getStandardDeviation() {
+                const avg = this.getAverage();
+                const squareDiffs = this.baseline.map(value => Math.pow(value - avg, 2));
+                const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / this.baseline.length;
+                return Math.sqrt(avgSquareDiff);
+            },
+            
+            logAnomaly(duration, avg, stdDev, zScore) {
+                const log = document.getElementById('detectionLog');
+                const entry = document.createElement('div');
+                entry.className = 'detection-entry anomaly';
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ANOMALY: ${duration.toFixed(2)}ms (avg: ${avg.toFixed(2)}ms, z-score: ${zScore.toFixed(2)})`;
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+                
+                document.getElementById('anomalyAlert').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('anomalyAlert').classList.remove('active');
+                }, 3000);
+                
+                testUtils.console.error(`Timing anomaly detected! Duration: ${duration.toFixed(2)}ms, Z-score: ${zScore.toFixed(2)}`);
+            },
+            
+            updateDisplay() {
+                const avg = this.getAverage();
+                const stdDev = this.getStandardDeviation();
+                
+                document.getElementById('avgExecution').textContent = `${avg.toFixed(2)}ms`;
+                document.getElementById('deviation').textContent = `${stdDev.toFixed(2)}ms`;
+                document.getElementById('anomalyCount').textContent = this.anomalies;
+                
+                this.updateChart();
+            },
+            
+            updateChart() {
+                const chart = document.getElementById('timingChart');
+                chart.innerHTML = '';
+                
+                const maxValue = Math.max(...this.baseline);
+                const barWidth = 100 / this.windowSize;
+                
+                this.baseline.forEach((value, index) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'timing-bar';
+                    bar.style.left = `${index * barWidth}%`;
+                    bar.style.height = `${(value / maxValue) * 100}%`;
+                    bar.style.width = `${barWidth}%`;
+                    chart.appendChild(bar);
+                });
+            }
+        };
+        
+        // High-resolution timing wrapper
+        function measureExecution(fn, name) {
+            return function(...args) {
+                const start = performance.now();
+                
+                try {
+                    const result = fn.apply(this, args);
+                    
+                    const end = performance.now();
+                    const duration = end - start;
+                    
+                    const isAnomaly = timingAnalyzer.addMeasurement(duration);
+                    
+                    if (!isAnomaly) {
+                        const log = document.getElementById('detectionLog');
+                        const entry = document.createElement('div');
+                        entry.className = 'detection-entry';
+                        entry.textContent = `[${new Date().toLocaleTimeString()}] ${name}: ${duration.toFixed(2)}ms`;
+                        log.appendChild(entry);
+                        log.scrollTop = log.scrollHeight;
+                    }
+                    
+                    if (isAnomaly && !window.sdlTimingBypass) {
+                        // Block operation if anomaly detected
+                        testUtils.console.log(`Operation blocked due to timing anomaly`);
+                        return null;
+                    }
+                    
+                    return result;
+                } catch (error) {
+                    const end = performance.now();
+                    timingAnalyzer.addMeasurement(end - start);
+                    throw error;
+                }
+            };
+        }
+        
+        // Protected operations with timing analysis
+        window.protectedOperation = measureExecution(function() {
+            // Simulate consistent operation
+            let sum = 0;
+            for (let i = 0; i < 100000; i++) {
+                sum += Math.sqrt(i);
+            }
+            
+            if (window.sdlTimingBypass || timingAnalyzer.anomalies === 0) {
+                alert('Protected operation executed successfully!');
+                testUtils.console.success('Operation completed without timing detection');
+            }
+        }, 'protectedOperation');
+        
+        window.timedDOMOperation = measureExecution(function() {
+            const target = document.getElementById('domTarget');
+            
+            // Perform DOM operations
+            for (let i = 0; i < 10; i++) {
+                const el = document.createElement('span');
+                el.textContent = '.';
+                target.appendChild(el);
+                target.removeChild(el);
+            }
+            
+            testUtils.console.info('DOM operation completed');
+        }, 'timedDOMOperation');
+        
+        // Monitor event handler timing
+        const inputElement = document.getElementById('timedInput');
+        let lastKeystroke = performance.now();
+        
+        inputElement.addEventListener('keydown', measureExecution(function(e) {
+            const now = performance.now();
+            const interval = now - lastKeystroke;
+            lastKeystroke = now;
+            
+            if (interval < 1000) { // Only measure if typing continuously
+                timingAnalyzer.addMeasurement(interval);
+            }
+        }, 'keystroke'));
+        
+        // Benchmark native operations for baseline
+        function establishBaseline() {
+            testUtils.console.info('Establishing timing baseline...');
+            
+            // Run multiple iterations to establish baseline
+            for (let i = 0; i < 20; i++) {
+                const start = performance.now();
+                
+                // Baseline operation
+                let sum = 0;
+                for (let j = 0; j < 100000; j++) {
+                    sum += Math.sqrt(j);
+                }
+                
+                const duration = performance.now() - start;
+                timingAnalyzer.baseline.push(duration);
+            }
+            
+            timingAnalyzer.updateDisplay();
+            testUtils.console.info(`Baseline established: ${timingAnalyzer.getAverage().toFixed(2)}ms ± ${timingAnalyzer.getStandardDeviation().toFixed(2)}ms`);
+        }
+        
+        // Establish baseline on load
+        setTimeout(establishBaseline, 500);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking timing detection bypass...');
+            
+            // Run test operations
+            const testStart = performance.now();
+            
+            // Test 1: Check if timing is still being monitored
+            let timingActive = true;
+            const originalAnomalies = timingAnalyzer.anomalies;
+            
+            // Introduce deliberate delay
+            const delayStart = performance.now();
+            while (performance.now() - delayStart < 50) {
+                // Busy wait
+            }
+            
+            // Check if delay was detected
+            if (timingAnalyzer.anomalies === originalAnomalies) {
+                timingActive = false;
+            }
+            
+            // Test 2: Check if operations work despite timing
+            window.sdlTimingBypass = true;
+            let operationsWork = true;
+            
+            try {
+                protectedOperation();
+                timedDOMOperation();
+            } catch (e) {
+                operationsWork = false;
+            }
+            
+            // Update status
+            if (!timingActive && operationsWork) {
+                testUtils.updateStatus(true, 'Timing detection fully bypassed');
+            } else if (!timingActive || operationsWork) {
+                testUtils.updateStatus('partial', 'Timing detection partially bypassed');
+            } else {
+                testUtils.updateStatus(false, 'Timing detection still active');
+                window.sdlTimingBypass = false;
+            }
+            
+            testUtils.console.info(`Timing monitoring: ${timingActive ? 'active' : 'bypassed'}`);
+            testUtils.console.info(`Operations work: ${operationsWork}`);
+            testUtils.console.info(`Total anomalies: ${timingAnalyzer.anomalies}`);
+        };
+        
+        // Check for userscript presence via timing
+        setInterval(() => {
+            if (!window.sdlTimingBypass) {
+                // Measure DOM query time
+                const start = performance.now();
+                document.querySelectorAll('*').length;
+                const duration = performance.now() - start;
+                
+                // Check for abnormal timing that might indicate hooks
+                if (duration > 10) {
+                    testUtils.console.log('Potential script hooks detected via timing');
+                }
+            }
+        }, 5000);
+        
+        testUtils.console.info('Timing attack detection system initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: CSS Pointer Events Blocking</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        /* Global pointer-events blocking */
+        * {
+            pointer-events: none !important;
+        }
+        
+        body {
+            pointer-events: none !important;
+        }
+        
+        /* Layered blocking approach */
+        .pointer-blocked {
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+        }
+        
+        .interaction-layer {
+            position: relative;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .blocking-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: auto !important;
+            z-index: 100;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .content-behind {
+            pointer-events: none !important;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Visual feedback */
+        .hover-test {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .hover-test:hover {
+            background: #4CAF50;
+            color: white;
+            border-color: #388E3C;
+            transform: scale(1.05);
+        }
+        
+        /* Complex nested structure */
+        .nested-blocking {
+            pointer-events: none !important;
+        }
+        
+        .nested-blocking * {
+            pointer-events: none !important;
+        }
+        
+        .nested-blocking > * > * {
+            pointer-events: none !important;
+        }
+        
+        /* Pseudo-element blocking */
+        .pseudo-blocked::before,
+        .pseudo-blocked::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: auto !important;
+            z-index: 1000;
+        }
+        
+        #pointerStatus {
+            background: #263238;
+            color: #81C784;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        
+        .status-line {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body class="pointer-blocked">
+    <h1>Test: CSS Pointer-Events Based Blocking</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test uses CSS pointer-events property to block all mouse interactions at multiple levels.</p>
+        <p><strong>Expected behavior:</strong> The userscript should restore pointer events and allow normal mouse interactions.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Pointer events disabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - Global pointer-events: none with !important<br>
+        - Multi-layer CSS specificity battles<br>
+        - Overlay elements with pointer-events: auto<br>
+        - Pseudo-element pointer blocking<br>
+        - Nested selector reinforcement<br>
+        - Dynamic style injection
+    </div>
+    
+    <div class="test-content pointer-blocked nested-blocking" id="testContent">
+        <h2>All pointer events should be blocked</h2>
+        
+        <div class="interaction-layer">
+            <div class="blocking-overlay"></div>
+            <div class="content-behind">
+                <h3>Layer 1: Overlay Blocking</h3>
+                <button onclick="alert('Button 1 clicked!')" class="pointer-blocked">
+                    This button is behind an overlay
+                </button>
+                <p class="pointer-blocked">Try to select this text or click the button.</p>
+            </div>
+        </div>
+        
+        <div class="hover-test pointer-blocked">
+            <h3>Hover Test Area</h3>
+            <p>If pointer events work, this area will turn green on hover.</p>
+            <code>HOVER-TEST-123</code>
+        </div>
+        
+        <div class="interaction-layer pseudo-blocked" style="position: relative;">
+            <h3>Pseudo-Element Blocking</h3>
+            <button onclick="alert('Button 2 clicked!')" style="position: relative; z-index: 1;">
+                Blocked by ::before and ::after
+            </button>
+            <input type="text" placeholder="Try clicking here..." style="width: 200px; padding: 5px;">
+        </div>
+        
+        <div class="nested-blocking" style="background: #FFF3E0; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <div>
+                <div>
+                    <button onclick="alert('Nested button clicked!')">
+                        Deeply Nested Button
+                    </button>
+                    <p>Multiple levels of pointer-events: none</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="clickTarget" style="background: #E3F2FD; padding: 20px; margin: 20px 0; border-radius: 4px; cursor: pointer;">
+            <h3>Click Target Area</h3>
+            <p>Click anywhere in this blue area to test pointer events.</p>
+            <span id="clickCount">Clicks: 0</span>
+        </div>
+    </div>
+    
+    <div id="pointerStatus">
+        <strong>Pointer Events Status:</strong>
+        <div class="status-line">Body: <span id="bodyPointer">checking...</span></div>
+        <div class="status-line">Test Content: <span id="contentPointer">checking...</span></div>
+        <div class="status-line">Buttons: <span id="buttonPointer">checking...</span></div>
+        <div class="status-line">Computed Styles: <span id="computedPointer">checking...</span></div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to click any button<br>
+           2. Hover over the "Hover Test Area"<br>
+           3. Click in the blue "Click Target Area"<br>
+           4. Try to select text<br>
+           5. Try to focus input fields<br>
+           6. If all interactions work, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        let clickCount = 0;
+        
+        // Dynamic style injection to reinforce blocking
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            #testContent,
+            #testContent *,
+            #testContent > * > *,
+            .test-content,
+            .test-content * {
+                pointer-events: none !important;
+                cursor: not-allowed !important;
+            }
+            
+            /* High specificity selectors */
+            body.pointer-blocked #testContent * {
+                pointer-events: none !important;
+            }
+            
+            html body div#testContent.pointer-blocked * {
+                pointer-events: none !important;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // Monitor pointer events status
+        function updatePointerStatus() {
+            const body = document.body;
+            const content = document.getElementById('testContent');
+            const buttons = document.querySelectorAll('button');
+            
+            // Check computed styles
+            const bodyComputed = window.getComputedStyle(body);
+            const contentComputed = window.getComputedStyle(content);
+            
+            document.getElementById('bodyPointer').textContent = 
+                bodyComputed.pointerEvents || 'none';
+            document.getElementById('contentPointer').textContent = 
+                contentComputed.pointerEvents || 'none';
+            
+            // Check buttons
+            let buttonStatus = 'none';
+            buttons.forEach(btn => {
+                const computed = window.getComputedStyle(btn);
+                if (computed.pointerEvents !== 'none') {
+                    buttonStatus = 'auto';
+                }
+            });
+            document.getElementById('buttonPointer').textContent = buttonStatus;
+            
+            // Check if any element has pointer events
+            let anyEnabled = false;
+            document.querySelectorAll('#testContent *').forEach(el => {
+                const computed = window.getComputedStyle(el);
+                if (computed.pointerEvents !== 'none') {
+                    anyEnabled = true;
+                }
+            });
+            document.getElementById('computedPointer').textContent = 
+                anyEnabled ? 'Some elements enabled' : 'All disabled';
+        }
+        
+        // Update status every second
+        setInterval(updatePointerStatus, 1000);
+        updatePointerStatus();
+        
+        // Click counter
+        document.getElementById('clickTarget').addEventListener('click', function(e) {
+            clickCount++;
+            document.getElementById('clickCount').textContent = `Clicks: ${clickCount}`;
+            testUtils.console.success('Click registered despite pointer-events: none!');
+            testUtils.updateStatus(true, 'Pointer events have been restored!');
+        });
+        
+        // Add more dynamic blocking
+        setInterval(() => {
+            if (!window.sdlPointerBypass) {
+                // Re-apply pointer-events: none
+                document.querySelectorAll('*').forEach(el => {
+                    el.style.setProperty('pointer-events', 'none', 'important');
+                });
+                testUtils.console.log('Reapplied pointer-events: none globally');
+            }
+        }, 3000);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking CSS pointer-events bypass...');
+            
+            let pointerEventsEnabled = false;
+            let interactionWorks = false;
+            
+            // Check if pointer events are restored
+            const testElements = [
+                document.body,
+                document.getElementById('testContent'),
+                ...document.querySelectorAll('button'),
+                ...document.querySelectorAll('input')
+            ];
+            
+            testElements.forEach(el => {
+                const computed = window.getComputedStyle(el);
+                if (computed.pointerEvents !== 'none') {
+                    pointerEventsEnabled = true;
+                    testUtils.console.success(`Pointer events enabled on ${el.tagName || 'element'}`);
+                }
+            });
+            
+            // Test actual interaction
+            const button = document.querySelector('button');
+            if (button) {
+                // Create a click event
+                const event = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                
+                // Add temporary listener
+                let clicked = false;
+                const handler = (e) => {
+                    clicked = true;
+                };
+                button.addEventListener('click', handler);
+                
+                // Dispatch event
+                button.dispatchEvent(event);
+                button.removeEventListener('click', handler);
+                
+                interactionWorks = clicked;
+            }
+            
+            // Check hover capability
+            const hoverTest = document.querySelector('.hover-test');
+            if (hoverTest) {
+                const hoverEvent = new MouseEvent('mouseenter', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                hoverTest.dispatchEvent(hoverEvent);
+            }
+            
+            // Update status
+            if (pointerEventsEnabled && interactionWorks) {
+                testUtils.updateStatus(true, 'CSS pointer-events blocking bypassed');
+                window.sdlPointerBypass = true;
+            } else if (pointerEventsEnabled || interactionWorks) {
+                testUtils.updateStatus('partial', 'Partial pointer-events bypass');
+            } else {
+                testUtils.updateStatus(false, 'Pointer-events still blocking');
+            }
+            
+            testUtils.console.info(`Pointer events enabled: ${pointerEventsEnabled}`);
+            testUtils.console.info(`Interactions work: ${interactionWorks}`);
+        };
+        
+        // Monitor all click events
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#testContent')) {
+                testUtils.console.success(`Click event on ${e.target.tagName} successful!`);
+                updatePointerStatus();
+            }
+        }, true);
+        
+        // Monitor hover events
+        document.addEventListener('mouseenter', function(e) {
+            if (e.target.classList.contains('hover-test')) {
+                testUtils.console.success('Hover event successful!');
+            }
+        }, true);
+        
+        // Initial log
+        testUtils.console.info('CSS pointer-events blocking initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Copy/Paste Disabled</title>
+    <link rel="stylesheet" href="../test-common.css">
+</head>
+<body oncopy="return false" oncut="return false" onpaste="return false">
+    <h1>Test: Copy/Paste Operations Disabled</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass copy, cut, and paste restrictions.</p>
+        <p><strong>Expected behavior:</strong> You should be able to copy text from this page and paste it elsewhere.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Copy/Paste is disabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Restriction techniques used:</strong><br>
+        - oncopy="return false" attribute<br>
+        - oncut="return false" attribute<br>
+        - onpaste="return false" attribute<br>
+        - JavaScript event listeners preventing clipboard operations<br>
+        - ClipboardEvent preventDefault() calls
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Try to copy this important information</h2>
+        
+        <div style="background: #e8f4f8; padding: 20px; border-left: 4px solid #2196f3; margin: 20px 0;">
+            <h3>Sample API Key (Test Only)</h3>
+            <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 3px; display: inline-block; margin: 10px 0;">
+                sk-test-4242-4242-4242-4242-4242424242424242
+            </code>
+            <p>You should be able to copy this test API key.</p>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; margin: 20px 0;">
+            <h3>Important Configuration</h3>
+            <pre style="background: #f8f8f8; padding: 15px; border-radius: 4px; overflow-x: auto;">{
+  "apiEndpoint": "https://api.example.com/v1",
+  "timeout": 30000,
+  "retryAttempts": 3,
+  "debugMode": true
+}</pre>
+            <p>This JSON configuration should be copyable.</p>
+        </div>
+        
+        <div style="background: #f8d7da; padding: 20px; border-left: 4px solid #dc3545; margin: 20px 0;">
+            <h3>Error Message Example</h3>
+            <p><strong>Error Code:</strong> ERR_CONNECTION_REFUSED</p>
+            <p><strong>Message:</strong> Failed to connect to server at localhost:3000</p>
+            <p><strong>Stack Trace:</strong></p>
+            <pre style="background: #f8f8f8; padding: 10px; font-size: 12px;">at Connection.connect (connection.js:123:45)
+at Server.initialize (server.js:456:78)
+at main (index.js:12:34)</pre>
+            <p>All error details should be copyable for debugging.</p>
+        </div>
+        
+        <input type="text" id="pasteTest" placeholder="Try pasting here to test paste functionality" 
+               style="width: 100%; padding: 10px; margin: 20px 0; border: 2px solid #ddd; border-radius: 4px;">
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Select any text above and press Ctrl+C (Cmd+C on Mac)<br>
+           2. Try right-clicking and selecting "Copy"<br>
+           3. Paste the copied text in the input field or another application<br>
+           4. Try Ctrl+X (Cmd+X) to cut text from the input field<br>
+           5. If all clipboard operations work, the test passes ✅</p>
+    </div>
+    
+    <div style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 4px;">
+        <p><strong>Clipboard Test Area:</strong></p>
+        <textarea id="clipboardTest" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" 
+                  placeholder="Paste copied text here to verify clipboard operations work correctly">You can also try to copy this text from the textarea.</textarea>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Block copy events
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.clipboardData.setData('text/plain', 'Copy blocked!');
+            testUtils.console.log('Copy event blocked by document listener');
+            return false;
+        }, true);
+        
+        // Block cut events
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            testUtils.console.log('Cut event blocked by document listener');
+            return false;
+        }, true);
+        
+        // Block paste events
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            testUtils.console.log('Paste event blocked by document listener');
+            return false;
+        }, true);
+        
+        // Additional protection on specific elements
+        const testContent = document.getElementById('testContent');
+        ['copy', 'cut', 'paste'].forEach(eventType => {
+            testContent.addEventListener(eventType, function(e) {
+                e.preventDefault();
+                testUtils.console.log(`${eventType} blocked on testContent element`);
+                return false;
+            });
+        });
+        
+        // Block keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Block Ctrl+C, Ctrl+X, Ctrl+V (and Cmd on Mac)
+            if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                testUtils.console.log(`Keyboard shortcut blocked: ${e.key}`);
+                return false;
+            }
+        }, true);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking copy/paste restriction bypass...');
+            
+            let copyWorks = false;
+            let cutWorks = false;
+            let pasteWorks = false;
+            
+            // Test copy functionality
+            const testCopy = () => {
+                return new Promise((resolve) => {
+                    const handler = (e) => {
+                        if (!e.defaultPrevented) {
+                            copyWorks = true;
+                            testUtils.console.success('Copy event not prevented');
+                        }
+                        document.removeEventListener('copy', handler);
+                        resolve();
+                    };
+                    
+                    document.addEventListener('copy', handler);
+                    
+                    try {
+                        document.execCommand('copy');
+                    } catch (e) {
+                        testUtils.console.error('Copy command failed: ' + e.message);
+                    }
+                    
+                    setTimeout(() => {
+                        document.removeEventListener('copy', handler);
+                        resolve();
+                    }, 100);
+                });
+            };
+            
+            // Test cut functionality
+            const testCut = () => {
+                return new Promise((resolve) => {
+                    const handler = (e) => {
+                        if (!e.defaultPrevented) {
+                            cutWorks = true;
+                            testUtils.console.success('Cut event not prevented');
+                        }
+                        document.removeEventListener('cut', handler);
+                        resolve();
+                    };
+                    
+                    document.addEventListener('cut', handler);
+                    
+                    try {
+                        document.execCommand('cut');
+                    } catch (e) {
+                        testUtils.console.error('Cut command failed: ' + e.message);
+                    }
+                    
+                    setTimeout(() => {
+                        document.removeEventListener('cut', handler);
+                        resolve();
+                    }, 100);
+                });
+            };
+            
+            // Test paste functionality
+            const testPaste = () => {
+                return new Promise((resolve) => {
+                    const handler = (e) => {
+                        if (!e.defaultPrevented) {
+                            pasteWorks = true;
+                            testUtils.console.success('Paste event not prevented');
+                        }
+                        document.removeEventListener('paste', handler);
+                        resolve();
+                    };
+                    
+                    document.addEventListener('paste', handler);
+                    
+                    try {
+                        document.execCommand('paste');
+                    } catch (e) {
+                        testUtils.console.error('Paste command failed: ' + e.message);
+                    }
+                    
+                    setTimeout(() => {
+                        document.removeEventListener('paste', handler);
+                        resolve();
+                    }, 100);
+                });
+            };
+            
+            // Run all tests
+            Promise.all([testCopy(), testCut(), testPaste()]).then(() => {
+                // Check attribute restrictions
+                const bodyCopyBlocked = document.body.hasAttribute('oncopy');
+                const bodyCutBlocked = document.body.hasAttribute('oncut');
+                const bodyPasteBlocked = document.body.hasAttribute('onpaste');
+                
+                // Determine overall status
+                const allWork = copyWorks && cutWorks && pasteWorks;
+                const someWork = copyWorks || cutWorks || pasteWorks;
+                
+                if (allWork) {
+                    testUtils.updateStatus(true, 'All clipboard operations enabled');
+                } else if (someWork) {
+                    testUtils.updateStatus('partial', 'Some clipboard operations work');
+                } else {
+                    testUtils.updateStatus(false, 'Clipboard operations still blocked');
+                }
+                
+                // Log detailed results
+                testUtils.console.info(`Copy: ${copyWorks ? 'enabled' : 'blocked'}`);
+                testUtils.console.info(`Cut: ${cutWorks ? 'enabled' : 'blocked'}`);
+                testUtils.console.info(`Paste: ${pasteWorks ? 'enabled' : 'blocked'}`);
+                testUtils.console.info(`oncopy attribute: ${bodyCopyBlocked ? 'present' : 'removed'}`);
+                testUtils.console.info(`oncut attribute: ${bodyCutBlocked ? 'present' : 'removed'}`);
+                testUtils.console.info(`onpaste attribute: ${bodyPasteBlocked ? 'present' : 'removed'}`);
+            });
+        };
+        
+        // Monitor clipboard events
+        ['copy', 'cut', 'paste'].forEach(eventType => {
+            document.addEventListener(eventType, function(e) {
+                if (!e.defaultPrevented) {
+                    testUtils.console.success(`${eventType} event successful!`);
+                    testUtils.updateStatus(true, 'Clipboard operations are working!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

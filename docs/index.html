@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow DOM Liberation - Free Your Web Content</title>
+    <meta name="description" content="A powerful userscript that removes artificial restrictions from websites, restoring your ability to select text, right-click, copy content, and use browser features freely.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/icon.svg">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Shadow DOM Liberation">
+    <meta property="og:description"
+        content="A powerful userscript that removes content restrictions and restores your ability to interact naturally with web content.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/images/og-image.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Shadow DOM Liberation">
+    <meta name="twitter:description" content="Free your web content from artificial restrictions">
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Shadow DOM Liberation",
+        "description": "A userscript that removes content restrictions from websites",
+        "applicationCategory": "BrowserExtension",
+        "operatingSystem": "Windows, macOS, Linux",
+        "softwareVersion": "1.0.0",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Shadow DOM Liberation Contributors",
+            "url": "https://github.com/dcondrey/shadow-dom-liberation"
+        },
+        "downloadUrl": "https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/shadow-dom-liberation.user.js",
+        "softwareHelp": {
+            "@type": "CreativeWork",
+            "url": "https://github.com/dcondrey/shadow-dom-liberation/wiki"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <a href="#main-content" class="skip-link" tabindex="0">Skip to main content</a>
+    
+    <!-- Hero Section -->
+    <header class="hero" role="banner">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <div class="container">
+                <div class="nav-brand">
+                    <img src="assets/images/icon.svg" alt="" class="nav-logo" aria-hidden="true">
+                    <span>Shadow DOM Liberation</span>
+                </div>
+                <ul class="nav-menu" role="list">
+                    <li><a href="#features" tabindex="0">Features</a></li>
+                    <li><a href="#demo" tabindex="0">Demo</a></li>
+                    <li><a href="#installation" tabindex="0">Install</a></li>
+                    <li><a href="https://github.com/dcondrey/shadow-dom-liberation" target="_blank" rel="noopener noreferrer" tabindex="0">GitHub<span class="sr-only"> (opens in new tab)</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="container">
+                <h1 class="hero-title">Free Your Web Content</h1>
+                <p class="hero-subtitle">
+                    Restore natural interaction with web pages. Remove artificial restrictions.
+                    Take back control of your browsing experience.
+                </p>
+                <div class="hero-actions" role="group" aria-label="Call to action buttons">
+                    <a href="#installation" class="btn btn-primary" tabindex="0" role="button">Install Now</a>
+                    <a href="demo.html" class="btn btn-secondary" tabindex="0" role="button">Try Demo</a>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">15+</span>
+                        <span class="stat-label">Restriction Types Bypassed</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Open Source</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">0ms</span>
+                        <span class="stat-label">Performance Impact</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+    
+    <!-- Features Section -->
+    <section id="features" class="section" aria-labelledby="features-heading">
+        <div class="container">
+            <h2 id="features-heading" class="section-title">What It Does</h2>
+            <p class="section-subtitle">
+                Shadow DOM Liberation removes common content restrictions that prevent natural interaction with web
+                pages.
+            </p>
+
+            <div class="features-grid" role="list">
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">🖱️</div>
+                    <h3>Right-Click Anywhere</h3>
+                    <p>Restore context menus on sites that disable right-clicking. Save images, inspect elements, and
+                        use browser features freely.</p>
+                </article>
+
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">📝</div>
+                    <h3>Select & Copy Text</h3>
+                    <p>Select and copy any text, even on sites that try to prevent it. Perfect for research,
+                        note-taking, and sharing.</p>
+                </article>
+
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">🖼️</div>
+                    <h3>Save Images</h3>
+                    <p>Download images without restrictions. Bypass overlay protection and drag-prevention techniques.
+                    </p>
+                </article>
+
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">🛡️</div>
+                    <h3>Bypass DevTools Detection</h3>
+                    <p>Use developer tools without triggering detection scripts. Inspect and debug freely.</p>
+                </article>
+
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">📋</div>
+                    <h3>Enable Clipboard</h3>
+                    <p>Cut, copy, and paste without restrictions. Work naturally with web content.</p>
+                </article>
+
+                <article class="feature-card" role="listitem" tabindex="0">
+                    <div class="feature-icon" aria-hidden="true">🎯</div>
+                    <h3>Shadow DOM Access</h3>
+                    <p>Access content hidden in Shadow DOM roots. Break through isolation barriers.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section section-alt" aria-labelledby="how-it-works-heading">
+        <div class="container">
+            <h2 id="how-it-works-heading" class="section-title">How It Works</h2>
+
+            <ol class="how-it-works" role="list">
+                <li class="step" tabindex="0">
+                    <div class="step-number" aria-hidden="true">1</div>
+                    <h3>Detection</h3>
+                    <p>Identifies restriction techniques used on the page</p>
+                </li>
+
+                <li class="step" tabindex="0">
+                    <div class="step-number" aria-hidden="true">2</div>
+                    <h3>Analysis</h3>
+                    <p>Analyzes DOM structure and event listeners</p>
+                </li>
+
+                <li class="step" tabindex="0">
+                    <div class="step-number" aria-hidden="true">3</div>
+                    <h3>Liberation</h3>
+                    <p>Removes restrictions while preserving functionality</p>
+                </li>
+
+                <li class="step" tabindex="0">
+                    <div class="step-number" aria-hidden="true">4</div>
+                    <h3>Protection</h3>
+                    <p>Prevents re-application of restrictions</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="section" aria-labelledby="demo-heading">
+        <div class="container">
+            <h2 id="demo-heading" class="section-title">See It In Action</h2>
+            <p class="section-subtitle">
+                Try these interactive demos to see how Shadow DOM Liberation restores your freedom to interact with web
+                content.
+            </p>
+
+            <div class="demo-grid">
+                <article class="demo-card" tabindex="0">
+                    <h3>Text Selection Test</h3>
+                    <div class="demo-content no-select" role="region" aria-label="Text selection demo area">
+                        <p>This text is protected with CSS user-select: none. Try selecting it!</p>
+                        <code>DEMO-CODE-123</code>
+                    </div>
+                    <a href="demos/text-selection.html" class="btn btn-small" role="button">Full Demo <span aria-hidden="true">→</span></a>
+                </article>
+
+                <article class="demo-card" tabindex="0">
+                    <h3>Right-Click Test</h3>
+                    <div class="demo-content" oncontextmenu="return false" role="region" aria-label="Right-click demo area">
+                        <p>Right-click is disabled here. Try it!</p>
+                        <img src="assets/images/demo-image.svg" alt="Demo image with right-click protection" style="width: 100px;">
+                    </div>
+                    <a href="demos/right-click.html" class="btn btn-small" role="button">Full Demo <span aria-hidden="true">→</span></a>
+                </article>
+
+                <article class="demo-card" tabindex="0">
+                    <h3>Copy Protection Test</h3>
+                    <div class="demo-content" oncopy="return false" role="region" aria-label="Copy protection demo area">
+                        <p>Copying is blocked. Try Ctrl+C!</p>
+                        <input type="text" value="Try to copy this text" readonly aria-label="Protected text input">
+                    </div>
+                    <a href="demos/copy-protection.html" class="btn btn-small" role="button">Full Demo <span aria-hidden="true">→</span></a>
+                </article>
+            </div>
+
+            <div class="demo-cta" role="group" aria-label="Demo action buttons">
+                <a href="demo.html" class="btn btn-primary" role="button" tabindex="0">View All Demos</a>
+                <a href="tests/test-runner.html" class="btn btn-secondary" role="button" tabindex="0">Run Test Suite</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="section section-alt" aria-labelledby="installation-heading">
+        <div class="container">
+            <h2 id="installation-heading" class="section-title">Quick Installation</h2>
+
+            <div class="install-steps">
+                <div class="install-step">
+                    <h3>Step 1: Install a Userscript Manager</h3>
+                    <p>Choose one of these browser extensions:</p>
+                    <div class="install-options">
+                        <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener noreferrer" class="install-option" tabindex="0">
+                            <img src="assets/images/tampermonkey.png" alt="" aria-hidden="true">
+                            <span>Tampermonkey</span>
+                            <span class="sr-only"> (opens in new tab)</span>
+                        </a>
+                        <a href="https://violentmonkey.github.io/" target="_blank" rel="noopener noreferrer" class="install-option" tabindex="0">
+                            <img src="assets/images/violentmonkey.png" alt="" aria-hidden="true">
+                            <span>Violentmonkey</span>
+                            <span class="sr-only"> (opens in new tab)</span>
+                        </a>
+                        <a href="https://www.greasespot.net/" target="_blank" rel="noopener noreferrer" class="install-option" tabindex="0">
+                            <img src="assets/images/greasemonkey.png" alt="" aria-hidden="true">
+                            <span>Greasemonkey</span>
+                            <span class="sr-only"> (opens in new tab)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="install-step">
+                    <h3>Step 2: Install Shadow DOM Liberation</h3>
+                    <p>Click the button below to install the userscript:</p>
+                    <a href="https://raw.githubusercontent.com/dcondrey/shadow-dom-liberation/main/shadow-dom-liberation.user.js"
+                        class="btn btn-primary btn-large" role="button" tabindex="0">
+                        <span aria-hidden="true">📥</span> Install Userscript
+                    </a>
+                </div>
+
+                <div class="install-step">
+                    <h3>Step 3: Enjoy Freedom!</h3>
+                    <p>The script runs automatically on all websites. Look for the icon in your userscript manager to verify it's active.</p>
+                </div>
+            </div>
+
+            <div class="install-note">
+                <p><strong>Note:</strong> For detailed installation instructions and troubleshooting, visit our <a href="installation.html">installation guide</a>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compatibility Section -->
+    <section class="section" aria-labelledby="compatibility-heading">
+        <div class="container">
+            <h2 id="compatibility-heading" class="section-title">Browser Compatibility</h2>
+
+            <div class="compatibility-grid" role="list" aria-label="Supported browsers">
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/chrome.svg" alt="" aria-hidden="true">
+                    <span>Chrome 90+</span>
+                </div>
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/firefox.svg" alt="" aria-hidden="true">
+                    <span>Firefox 85+</span>
+                </div>
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/safari.svg" alt="" aria-hidden="true">
+                    <span>Safari 14+</span>
+                </div>
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/edge.svg" alt="" aria-hidden="true">
+                    <span>Edge 90+</span>
+                </div>
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/opera.svg" alt="" aria-hidden="true">
+                    <span>Opera 75+</span>
+                </div>
+                <div class="browser-card supported" role="listitem" tabindex="0">
+                    <img src="assets/images/brave.svg" alt="" aria-hidden="true">
+                    <span>Brave Latest</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Shadow DOM Liberation</h4>
+                    <p>Free and open-source userscript for restoring natural web interaction.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/dcondrey/shadow-dom-liberation" aria-label="GitHub">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <nav aria-label="Footer quick links">
+                    <ul role="list">
+                        <li><a href="demo.html">Interactive Demos</a></li>
+                        <li><a href="installation.html">Installation Guide</a></li>
+                        <li><a href="tests/test-runner.html">Test Suite</a></li>
+                        <li><a href="https://github.com/dcondrey/shadow-dom-liberation/issues">Report Issues</a></li>
+                    </ul>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <nav aria-label="Footer resources">
+                    <ul role="list">
+                        <li><a href="https://github.com/dcondrey/shadow-dom-liberation#readme">Documentation</a></li>
+                        <li><a href="https://github.com/dcondrey/shadow-dom-liberation/blob/main/LICENSE">License</a>
+                        </li>
+                        <li><a
+                                href="https://github.com/dcondrey/shadow-dom-liberation/blob/main/CONTRIBUTING.md">Contributing</a>
+                        </li>
+                        <li><a href="tests/real-world-sites.html">Real-World Examples</a></li>
+                    </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shadow DOM Liberation. Released under MIT License.</p>
+                <p>Use responsibly and respect content creators' rights.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>

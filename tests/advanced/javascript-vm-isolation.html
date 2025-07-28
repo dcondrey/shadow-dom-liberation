@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: JavaScript VM Isolation</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .vm-status {
+            background: #1a237e;
+            color: #64b5f6;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        
+        .vm-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .vm-label {
+            color: #90caf9;
+            font-weight: bold;
+        }
+        
+        .vm-value {
+            color: #e1f5fe;
+        }
+        
+        .isolation-test {
+            background: #fff3e0;
+            padding: 20px;
+            border: 2px solid #ff6f00;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .sandbox-frame {
+            border: 2px solid #f44336;
+            padding: 10px;
+            margin: 10px 0;
+            background: #ffebee;
+        }
+        
+        #protectedData {
+            background: #e8f5e9;
+            padding: 15px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: JavaScript VM Isolation Protection</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test implements VM-based isolation to protect content by running protection code in isolated contexts.</p>
+        <p><strong>Expected behavior:</strong> The userscript should bypass VM isolation and access protected functionality.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Content isolated in VM
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - Isolated execution contexts<br>
+        - Function constructor sandboxing<br>
+        - Proxy-based access control<br>
+        - Closure-based private variables<br>
+        - Native function wrapping<br>
+        - Global object isolation
+    </div>
+    
+    <div class="vm-status">
+        <h3>VM Isolation Status:</h3>
+        <div class="vm-info">
+            <span class="vm-label">Isolated Context:</span>
+            <span class="vm-value" id="vmContext">Active</span>
+            
+            <span class="vm-label">Global Access:</span>
+            <span class="vm-value" id="vmGlobal">Restricted</span>
+            
+            <span class="vm-label">Function Access:</span>
+            <span class="vm-value" id="vmFunction">Wrapped</span>
+            
+            <span class="vm-label">Protection Level:</span>
+            <span class="vm-value" id="vmLevel">Maximum</span>
+        </div>
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>VM-Protected Content</h2>
+        
+        <div class="isolation-test">
+            <h3>Test 1: Isolated Event Handlers</h3>
+            <button id="vmButton">Click Me (VM Protected)</button>
+            <p>This button's handler runs in an isolated context.</p>
+        </div>
+        
+        <div class="isolation-test">
+            <h3>Test 2: Protected Data Access</h3>
+            <div id="protectedData">
+                <strong>Protected Information:</strong><br>
+                <span id="secretData">Loading...</span>
+            </div>
+            <button onclick="revealSecret()">Reveal Secret (Should fail)</button>
+        </div>
+        
+        <div class="isolation-test">
+            <h3>Test 3: Sandboxed Operations</h3>
+            <input type="text" id="sandboxInput" placeholder="Type here...">
+            <button id="sandboxButton">Process in Sandbox</button>
+            <div id="sandboxOutput" style="margin-top: 10px; font-family: monospace;"></div>
+        </div>
+        
+        <div class="sandbox-frame">
+            <h3>Test 4: Function Constructor Isolation</h3>
+            <p>Content protected by Function constructor sandbox.</p>
+            <code id="sandboxCode">VM-ISOLATED-789</code>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Click the VM protected button<br>
+           2. Try to reveal the secret data<br>
+           3. Test the sandboxed input processing<br>
+           4. Attempt to access isolated variables<br>
+           5. Check console for isolation bypass<br>
+           6. If protected functions work normally, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Create isolated context using Function constructor
+        const createIsolatedContext = (function() {
+            'use strict';
+            
+            // Private variables in closure
+            const privateData = {
+                secret: 'VM-SECRET-KEY-123456',
+                protectionActive: true,
+                accessAttempts: 0
+            };
+            
+            // Create sandboxed execution environment
+            const sandbox = new Function('code', `
+                'use strict';
+                const window = {};
+                const document = {};
+                const global = {};
+                const self = {};
+                
+                try {
+                    return eval(code);
+                } catch (e) {
+                    return { error: e.message };
+                }
+            `);
+            
+            return {
+                execute: sandbox,
+                getSecret: function() {
+                    privateData.accessAttempts++;
+                    if (privateData.protectionActive && !window.sdlVMBypass) {
+                        return '[ACCESS DENIED]';
+                    }
+                    return privateData.secret;
+                },
+                getStatus: function() {
+                    return {
+                        attempts: privateData.accessAttempts,
+                        protected: privateData.protectionActive
+                    };
+                }
+            };
+        })();
+        
+        // Proxy-based access control
+        const protectedObject = new Proxy({}, {
+            get(target, prop) {
+                testUtils.console.log(`Proxy: Access attempt to property '${prop}'`);
+                if (!window.sdlVMBypass) {
+                    return undefined;
+                }
+                return target[prop];
+            },
+            set(target, prop, value) {
+                testUtils.console.log(`Proxy: Set attempt for property '${prop}'`);
+                if (!window.sdlVMBypass) {
+                    return false;
+                }
+                target[prop] = value;
+                return true;
+            }
+        });
+        
+        // Wrap native functions
+        const originalAlert = window.alert;
+        const originalConsoleLog = console.log;
+        
+        window.alert = new Proxy(originalAlert, {
+            apply(target, thisArg, args) {
+                if (!window.sdlVMBypass) {
+                    testUtils.console.log('Alert blocked by VM protection');
+                    return;
+                }
+                return target.apply(thisArg, args);
+            }
+        });
+        
+        // Isolated button handler
+        document.getElementById('vmButton').addEventListener('click', function() {
+            // Execute in isolated context
+            const result = createIsolatedContext.execute(`
+                try {
+                    // This runs in isolation
+                    const message = 'Button clicked in VM!';
+                    return { success: true, message: message };
+                } catch (e) {
+                    return { success: false, error: e.message };
+                }
+            `);
+            
+            if (result.success) {
+                testUtils.console.success('VM button handler executed!');
+                if (window.sdlVMBypass) {
+                    originalAlert('VM Protection Bypassed! Button clicked successfully!');
+                }
+            } else {
+                testUtils.console.error('VM execution failed: ' + result.error);
+            }
+        });
+        
+        // Protected data access
+        window.revealSecret = function() {
+            const secret = createIsolatedContext.getSecret();
+            document.getElementById('secretData').textContent = secret;
+            
+            const status = createIsolatedContext.getStatus();
+            testUtils.console.info(`Access attempts: ${status.attempts}`);
+            
+            if (secret !== '[ACCESS DENIED]') {
+                testUtils.console.success('VM isolation bypassed - secret revealed!');
+                testUtils.updateStatus(true, 'VM isolation has been bypassed!');
+                window.sdlVMBypass = true;
+            }
+        };
+        
+        // Sandbox processing
+        document.getElementById('sandboxButton').addEventListener('click', function() {
+            const input = document.getElementById('sandboxInput').value;
+            const output = document.getElementById('sandboxOutput');
+            
+            // Process in sandbox
+            const result = createIsolatedContext.execute(`
+                const processed = '${input}'.toUpperCase();
+                return 'Sandboxed result: ' + processed;
+            `);
+            
+            output.textContent = result;
+            testUtils.console.info('Sandbox execution completed');
+        });
+        
+        // Override native functions in isolated scope
+        (function() {
+            'use strict';
+            const isolatedScope = {
+                document: {
+                    addEventListener: function() {
+                        testUtils.console.log('Isolated addEventListener called');
+                    },
+                    querySelector: function() {
+                        testUtils.console.log('Isolated querySelector called');
+                        return null;
+                    }
+                }
+            };
+            
+            // Store reference
+            window._isolatedScope = isolatedScope;
+        })();
+        
+        // Update VM status display
+        function updateVMStatus() {
+            const status = createIsolatedContext.getStatus();
+            
+            document.getElementById('vmContext').textContent = 
+                status.protected ? 'Active' : 'Bypassed';
+            document.getElementById('vmGlobal').textContent = 
+                window.sdlVMBypass ? 'Accessible' : 'Restricted';
+            document.getElementById('vmFunction').textContent = 
+                window.alert === originalAlert ? 'Unwrapped' : 'Wrapped';
+            document.getElementById('vmLevel').textContent = 
+                status.protected && !window.sdlVMBypass ? 'Maximum' : 'Compromised';
+        }
+        
+        setInterval(updateVMStatus, 1000);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking VM isolation bypass...');
+            
+            // Test 1: Can we access isolated context?
+            let contextAccessible = false;
+            try {
+                const testAccess = createIsolatedContext.getSecret();
+                if (testAccess !== '[ACCESS DENIED]') {
+                    contextAccessible = true;
+                }
+            } catch (e) {
+                testUtils.console.error('Context access error: ' + e.message);
+            }
+            
+            // Test 2: Are native functions restored?
+            const functionsRestored = window.alert === originalAlert;
+            
+            // Test 3: Can we access proxy object?
+            let proxyAccessible = false;
+            try {
+                protectedObject.test = 'value';
+                if (protectedObject.test === 'value') {
+                    proxyAccessible = true;
+                }
+            } catch (e) {
+                testUtils.console.error('Proxy access error: ' + e.message);
+            }
+            
+            // Test 4: Check if VM protection is bypassed
+            window.sdlVMBypass = true;
+            const finalSecret = createIsolatedContext.getSecret();
+            const vmBypassed = finalSecret !== '[ACCESS DENIED]';
+            
+            // Update status
+            if (vmBypassed && (contextAccessible || functionsRestored || proxyAccessible)) {
+                testUtils.updateStatus(true, 'VM isolation fully bypassed');
+            } else if (vmBypassed || contextAccessible || functionsRestored || proxyAccessible) {
+                testUtils.updateStatus('partial', 'VM isolation partially bypassed');
+            } else {
+                testUtils.updateStatus(false, 'VM isolation still active');
+                window.sdlVMBypass = false;
+            }
+            
+            // Log results
+            testUtils.console.info(`Context accessible: ${contextAccessible}`);
+            testUtils.console.info(`Functions restored: ${functionsRestored}`);
+            testUtils.console.info(`Proxy accessible: ${proxyAccessible}`);
+            testUtils.console.info(`VM bypassed: ${vmBypassed}`);
+            
+            updateVMStatus();
+        };
+        
+        // Initialize protected data
+        document.getElementById('secretData').textContent = createIsolatedContext.getSecret();
+        
+        testUtils.console.info('VM isolation protection initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Iframe Restrictions</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .iframe-container {
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+        
+        .iframe-info {
+            background: #f5f5f5;
+            padding: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Iframe-Based Content Restrictions</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass restrictions within iframes and nested iframes.</p>
+        <p><strong>Expected behavior:</strong> You should be able to interact with content inside all iframes as if no restrictions exist.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Iframe content is restricted
+    </div>
+    
+    <div class="technique-details">
+        <strong>Restriction techniques used:</strong><br>
+        - Same-origin iframe with restrictions<br>
+        - Nested iframe protection<br>
+        - Iframe sandbox attributes<br>
+        - Dynamic iframe injection<br>
+        - Cross-frame event blocking
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Iframe Test Cases</h2>
+        
+        <div class="iframe-container">
+            <div class="iframe-info">
+                <strong>Test 1:</strong> Basic iframe with content restrictions
+            </div>
+            <iframe id="iframe1" srcdoc="
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            padding: 20px;
+                            user-select: none;
+                            -webkit-user-select: none;
+                        }
+                        .content {
+                            background: #e3f2fd;
+                            padding: 20px;
+                            border-radius: 4px;
+                        }
+                    </style>
+                </head>
+                <body oncontextmenu='return false' onselectstart='return false'>
+                    <div class='content'>
+                        <h3>Iframe Content (Restricted)</h3>
+                        <p>This text should be selectable after bypass.</p>
+                        <p>Right-click should work here.</p>
+                        <button onclick='alert(&quot;Button in iframe clicked!&quot;)'>Click Me</button>
+                        <p>Copy this text: <code>IFRAME-TEST-123</code></p>
+                    </div>
+                    <script>
+                        document.addEventListener('copy', e => e.preventDefault());
+                        document.addEventListener('contextmenu', e => e.preventDefault());
+                    </script>
+                </body>
+                </html>
+            "></iframe>
+        </div>
+        
+        <div class="iframe-container">
+            <div class="iframe-info">
+                <strong>Test 2:</strong> Nested iframes with layered restrictions
+            </div>
+            <iframe id="iframe2" srcdoc="
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        iframe { width: 100%; height: 200px; border: 1px solid #ccc; }
+                    </style>
+                </head>
+                <body>
+                    <h3>Outer Iframe</h3>
+                    <p>This contains another iframe:</p>
+                    <iframe srcdoc='
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <style>
+                                body { 
+                                    font-family: Arial, sans-serif; 
+                                    padding: 15px;
+                                    background: #fff3cd;
+                                }
+                                * { 
+                                    user-select: none !important;
+                                    -webkit-user-drag: none !important;
+                                }
+                            </style>
+                        </head>
+                        <body oncontextmenu=&quot;return false&quot; ondragstart=&quot;return false&quot;>
+                            <h4>Nested Iframe Content</h4>
+                            <p>Deeply nested content with restrictions.</p>
+                            <img src=&quot;data:image/svg+xml,%3Csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; width=&apos;150&apos; height=&apos;100&apos;%3E%3Crect width=&apos;150&apos; height=&apos;100&apos; fill=&apos;%23FF5722&apos;/%3E%3Ctext x=&apos;50%25&apos; y=&apos;50%25&apos; text-anchor=&apos;middle&apos; dy=&apos;.3em&apos; fill=&apos;white&apos; font-family=&apos;Arial&apos; font-size=&apos;14&apos;%3EDrag Me%3C/text%3E%3C/svg%3E&quot; 
+                                 alt=&quot;Nested iframe image&quot; 
+                                 draggable=&quot;false&quot;>
+                        </body>
+                        </html>
+                    '></iframe>
+                </body>
+                </html>
+            "></iframe>
+        </div>
+        
+        <div class="iframe-container">
+            <div class="iframe-info">
+                <strong>Test 3:</strong> Dynamically created iframe with restrictions
+            </div>
+            <div id="dynamicIframeContainer"></div>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to select text in each iframe<br>
+           2. Right-click inside the iframes<br>
+           3. Click buttons in the iframes<br>
+           4. Try to drag images in nested iframes<br>
+           5. Copy text from within iframes<br>
+           6. If all operations work in all iframes, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Create dynamic iframe
+        function createDynamicIframe() {
+            const container = document.getElementById('dynamicIframeContainer');
+            const iframe = document.createElement('iframe');
+            iframe.id = 'iframe3';
+            iframe.style.width = '100%';
+            iframe.style.height = '300px';
+            iframe.style.border = 'none';
+            
+            container.appendChild(iframe);
+            
+            // Write content to iframe
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            padding: 20px;
+                            background: #f1f8e9;
+                        }
+                        .no-select {
+                            user-select: none !important;
+                            -webkit-user-select: none !important;
+                            -moz-user-select: none !important;
+                        }
+                        .overlay {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            z-index: 1000;
+                            background: rgba(0,0,0,0.01);
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="overlay" oncontextmenu="return false" onclick="return false"></div>
+                    <div class="no-select">
+                        <h3>Dynamic Iframe with Overlay</h3>
+                        <p>This iframe was created dynamically and has an overlay protection.</p>
+                        <input type="text" placeholder="Try typing here..." style="padding: 5px;">
+                        <p>Protected content: <strong>DYNAMIC-CONTENT-789</strong></p>
+                    </div>
+                </body>
+                </html>
+            `);
+            doc.close();
+            
+            // Add restrictions via JavaScript
+            doc.addEventListener('DOMContentLoaded', function() {
+                doc.addEventListener('selectstart', e => e.preventDefault());
+                doc.addEventListener('copy', e => e.preventDefault());
+                doc.addEventListener('contextmenu', e => e.preventDefault());
+            });
+            
+            testUtils.console.info('Dynamic iframe created with restrictions');
+        }
+        
+        // Create dynamic iframe on load
+        createDynamicIframe();
+        
+        // Monitor iframe interactions
+        function monitorIframe(iframe, name) {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Check for successful interactions
+                iframeDoc.addEventListener('contextmenu', function(e) {
+                    if (!e.defaultPrevented) {
+                        testUtils.console.success(`Right-click worked in ${name}!`);
+                        checkAllIframesLiberated();
+                    }
+                });
+                
+                iframeDoc.addEventListener('copy', function(e) {
+                    if (!e.defaultPrevented) {
+                        testUtils.console.success(`Copy worked in ${name}!`);
+                        checkAllIframesLiberated();
+                    }
+                });
+                
+                // Monitor text selection
+                iframeDoc.addEventListener('selectionchange', function() {
+                    const selection = iframeDoc.getSelection().toString();
+                    if (selection.length > 0) {
+                        testUtils.console.success(`Text selected in ${name}: "${selection.substring(0, 30)}..."`);
+                        checkAllIframesLiberated();
+                    }
+                });
+            } catch (e) {
+                testUtils.console.error(`Cannot monitor ${name}: ${e.message}`);
+            }
+        }
+        
+        // Set up monitoring for all iframes
+        setTimeout(() => {
+            document.querySelectorAll('iframe').forEach((iframe, index) => {
+                monitorIframe(iframe, `iframe${index + 1}`);
+                
+                // Also monitor nested iframes
+                try {
+                    const nestedIframes = iframe.contentDocument.querySelectorAll('iframe');
+                    nestedIframes.forEach((nested, nestedIndex) => {
+                        monitorIframe(nested, `iframe${index + 1}-nested${nestedIndex + 1}`);
+                    });
+                } catch (e) {
+                    // Ignore cross-origin errors
+                }
+            });
+        }, 1000);
+        
+        // Check if all iframes are liberated
+        function checkAllIframesLiberated() {
+            window.iframeLiberated = true;
+            testUtils.updateStatus(true, 'Iframe restrictions bypassed!');
+        }
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking iframe restriction bypass...');
+            
+            let allIframesAccessible = true;
+            let restrictionsBypassed = 0;
+            let totalChecks = 0;
+            
+            // Check each iframe
+            document.querySelectorAll('iframe').forEach((iframe, index) => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const iframeBody = iframeDoc.body;
+                    
+                    totalChecks++;
+                    
+                    // Check if restrictions are bypassed
+                    const computed = iframe.contentWindow.getComputedStyle(iframeBody);
+                    const selectEnabled = computed.userSelect !== 'none';
+                    const contextMenuBlocked = iframeBody.hasAttribute('oncontextmenu');
+                    const selectStartBlocked = iframeBody.hasAttribute('onselectstart');
+                    
+                    if (selectEnabled || !contextMenuBlocked || !selectStartBlocked) {
+                        restrictionsBypassed++;
+                    }
+                    
+                    testUtils.console.info(`Iframe ${index + 1}: select=${selectEnabled}, contextmenu=${!contextMenuBlocked}, selectstart=${!selectStartBlocked}`);
+                    
+                } catch (e) {
+                    allIframesAccessible = false;
+                    testUtils.console.error(`Cannot access iframe ${index + 1}: ${e.message}`);
+                }
+            });
+            
+            // Update status based on results
+            if (window.iframeLiberated) {
+                testUtils.updateStatus(true, 'All iframe restrictions bypassed');
+            } else if (restrictionsBypassed === totalChecks && allIframesAccessible) {
+                testUtils.updateStatus(true, 'Iframe restrictions bypassed');
+            } else if (restrictionsBypassed > 0) {
+                testUtils.updateStatus('partial', `${restrictionsBypassed}/${totalChecks} iframes liberated`);
+            } else {
+                testUtils.updateStatus(false, 'Iframe restrictions still active');
+            }
+        };
+        
+        // Test iframe access after delay
+        setTimeout(() => {
+            checkRestrictionBypassed();
+        }, 2000);
+    </script>
+</body>
+</html>

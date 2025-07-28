@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Text Selection Blocked</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -khtml-user-select: none;
+        }
+        
+        .test-content * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+    </style>
+</head>
+<body onselectstart="return false" onmousedown="return false">
+    <h1>Test: Text Selection Blocked</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass text selection restrictions.</p>
+        <p><strong>Expected behavior:</strong> You should be able to select and highlight any text on this page.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Text selection is disabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Restriction techniques used:</strong><br>
+        - CSS user-select: none with !important<br>
+        - onselectstart="return false" attribute<br>
+        - onmousedown="return false" attribute<br>
+        - JavaScript event listeners blocking selection<br>
+        - Multiple vendor prefixes for compatibility
+    </div>
+    
+    <div class="test-content no-select" id="testContent">
+        <h2>Try to select this text</h2>
+        <p>The quick brown fox jumps over the lazy dog. This classic pangram contains every letter of the alphabet at least once. You should be able to select and copy this text freely.</p>
+        
+        <blockquote>
+            "The only way to do great work is to love what you do." - Steve Jobs
+            <br><br>
+            This quote should be selectable and copyable like any other text on the web.
+        </blockquote>
+        
+        <ul>
+            <li>First item - should be selectable</li>
+            <li>Second item - should be selectable</li>
+            <li>Third item - should be selectable</li>
+        </ul>
+        
+        <div style="background: #f0f0f0; padding: 15px; margin: 15px 0; border-radius: 5px;">
+            <strong>Code snippet:</strong>
+            <pre style="margin: 10px 0;">function helloWorld() {
+    console.log("Hello, World!");
+    return true;
+}</pre>
+            This code should be selectable for easy copying.
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to select any text with your mouse<br>
+           2. Try using Ctrl+A (Cmd+A on Mac) to select all<br>
+           3. Try triple-clicking to select paragraphs<br>
+           4. Try shift+arrow keys to select text<br>
+           5. If you can select and highlight text, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Block selection with JavaScript
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            testUtils.console.log('Selection blocked by selectstart listener');
+            return false;
+        }, true);
+        
+        // Block mousedown to prevent selection
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.closest('#testContent')) {
+                e.preventDefault();
+                testUtils.console.log('Mousedown blocked to prevent selection');
+                return false;
+            }
+        }, true);
+        
+        // Block selection change
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0 && !window.sdlLiberated) {
+                selection.removeAllRanges();
+                testUtils.console.log('Selection removed by selectionchange listener');
+            }
+        });
+        
+        // Disable text selection with additional methods
+        document.body.style.webkitUserSelect = 'none';
+        document.body.style.mozUserSelect = 'none';
+        document.body.style.msUserSelect = 'none';
+        document.body.style.userSelect = 'none';
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking text selection restriction bypass...');
+            
+            // Method 1: Check CSS user-select property
+            const testElement = document.getElementById('testContent');
+            const computedStyle = window.getComputedStyle(testElement);
+            const userSelectEnabled = computedStyle.userSelect !== 'none';
+            
+            // Method 2: Try to programmatically select text
+            let selectionWorks = false;
+            try {
+                const range = document.createRange();
+                const textNode = testElement.querySelector('p').firstChild;
+                range.setStart(textNode, 0);
+                range.setEnd(textNode, 10);
+                
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                
+                selectionWorks = window.getSelection().toString().length > 0;
+                
+                if (!selectionWorks) {
+                    // Mark that SDL tried to liberate
+                    window.sdlLiberated = true;
+                    
+                    // Try again
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    selectionWorks = window.getSelection().toString().length > 0;
+                }
+                
+                window.getSelection().removeAllRanges();
+            } catch (e) {
+                testUtils.console.error('Selection test failed: ' + e.message);
+            }
+            
+            // Method 3: Check event handlers
+            const selectStartBlocked = document.body.hasAttribute('onselectstart');
+            const mouseDownBlocked = document.body.hasAttribute('onmousedown');
+            
+            // Determine overall status
+            if (userSelectEnabled && selectionWorks) {
+                testUtils.updateStatus(true, 'Text selection is fully enabled');
+            } else if (selectionWorks) {
+                testUtils.updateStatus('partial', 'Text selection partially works');
+            } else {
+                testUtils.updateStatus(false, 'Text selection is still blocked');
+            }
+            
+            // Log detailed results
+            testUtils.console.info(`CSS user-select: ${userSelectEnabled ? 'enabled' : 'disabled'}`);
+            testUtils.console.info(`Programmatic selection: ${selectionWorks ? 'works' : 'blocked'}`);
+            testUtils.console.info(`onselectstart attribute: ${selectStartBlocked ? 'present' : 'removed'}`);
+            testUtils.console.info(`onmousedown attribute: ${mouseDownBlocked ? 'present' : 'removed'}`);
+        };
+        
+        // Monitor selection changes
+        let lastSelection = '';
+        setInterval(() => {
+            const currentSelection = window.getSelection().toString();
+            if (currentSelection !== lastSelection && currentSelection.length > 0) {
+                testUtils.console.success(`Text selected: "${currentSelection.substring(0, 50)}..."`);
+                testUtils.updateStatus(true, 'Text selection is working!');
+                lastSelection = currentSelection;
+            }
+        }, 500);
+    </script>
+</body>
+</html>

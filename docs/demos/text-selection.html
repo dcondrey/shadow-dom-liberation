@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Selection Demo - Shadow DOM Liberation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f3f4f6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-area {
+            background: #f9fafb;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+        
+        .no-select {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background: #4f46e5;
+        }
+        
+        .status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+        
+        .status.blocked {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .status.allowed {
+            background: #d1fae5;
+            color: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Selection Blocking Demo</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Note:</strong> This demo simulates text selection blocking. 
+            Install Shadow DOM Liberation to bypass these restrictions on real websites.
+        </div>
+        
+        <button onclick="toggleSelection()">Toggle Text Selection</button>
+        <div class="status blocked" id="status">Text Selection: BLOCKED</div>
+        
+        <div class="demo-area no-select" id="demoArea">
+            <h2>Try to Select This Text</h2>
+            <p>
+                This text is protected using CSS user-select: none. Many websites use this 
+                technique to prevent users from copying content, even when it's publicly available.
+            </p>
+            <p>
+                Important information that should be selectable:
+            </p>
+            <ul>
+                <li>Email: contact@example.com</li>
+                <li>Phone: +1-234-567-8900</li>
+                <li>API Key: sk_test_1234567890abcdef</li>
+            </ul>
+            <blockquote>
+                "The web is fundamentally designed to be open and accessible. 
+                Artificial restrictions go against the spirit of the internet."
+            </blockquote>
+        </div>
+        
+        <p><a href="../demo.html">← Back to all demos</a></p>
+    </div>
+    
+    <script>
+        let selectionBlocked = true;
+        
+        function toggleSelection() {
+            const demoArea = document.getElementById('demoArea');
+            const status = document.getElementById('status');
+            
+            selectionBlocked = !selectionBlocked;
+            
+            if (selectionBlocked) {
+                demoArea.classList.add('no-select');
+                status.textContent = 'Text Selection: BLOCKED';
+                status.className = 'status blocked';
+            } else {
+                demoArea.classList.remove('no-select');
+                status.textContent = 'Text Selection: ALLOWED';
+                status.className = 'status allowed';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Right-Click Disabled</title>
+    <link rel="stylesheet" href="../test-common.css">
+</head>
+<body>
+    <h1>Test: Right-Click Context Menu Disabled</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass right-click (context menu) restrictions.</p>
+        <p><strong>Expected behavior:</strong> You should be able to right-click anywhere on the page and see the browser's context menu.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Right-click is disabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Restriction technique used:</strong><br>
+        - oncontextmenu="return false" attribute<br>
+        - document.addEventListener('contextmenu', preventDefault)<br>
+        - Multiple nested handlers to prevent bypass
+    </div>
+    
+    <div class="test-content" id="testContent" oncontextmenu="return false">
+        <h2>Try to right-click this content</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+        
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='300' height='200' fill='%234CAF50'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='20'%3ERight-click me!%3C/text%3E%3C/svg%3E" 
+             alt="Test image" 
+             class="test-image"
+             oncontextmenu="return false">
+        
+        <p>The context menu should appear when you right-click on any element above, including the image.</p>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Right-click on the text above<br>
+           2. Right-click on the image<br>
+           3. Right-click on empty space<br>
+           4. If the context menu appears in all cases, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Additional restriction methods
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            testUtils.console.log('Context menu event blocked by document listener');
+            return false;
+        }, true);
+        
+        // Add another layer of protection
+        document.body.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            testUtils.console.log('Context menu event blocked by body listener');
+            return false;
+        });
+        
+        // Try to block with capturing phase
+        window.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            testUtils.console.log('Context menu event blocked by window listener');
+            return false;
+        }, true);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking right-click restriction bypass...');
+            
+            // Create a test element
+            const testDiv = document.createElement('div');
+            testDiv.style.width = '100px';
+            testDiv.style.height = '100px';
+            testDiv.style.position = 'absolute';
+            testDiv.style.left = '-9999px';
+            document.body.appendChild(testDiv);
+            
+            let contextMenuFired = false;
+            let defaultPrevented = false;
+            
+            // Add a test listener
+            testDiv.addEventListener('contextmenu', function(e) {
+                contextMenuFired = true;
+                defaultPrevented = e.defaultPrevented;
+            });
+            
+            // Simulate right-click
+            const event = new MouseEvent('contextmenu', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                button: 2
+            });
+            
+            testDiv.dispatchEvent(event);
+            
+            // Clean up
+            document.body.removeChild(testDiv);
+            
+            // Check results
+            if (contextMenuFired && !defaultPrevented) {
+                testUtils.updateStatus(true, 'Right-click is enabled');
+            } else {
+                testUtils.updateStatus(false, 'Right-click is still blocked');
+            }
+            
+            // Also test on the actual content
+            let manualTestPassed = false;
+            document.getElementById('testContent').addEventListener('contextmenu', function(e) {
+                if (!e.defaultPrevented) {
+                    manualTestPassed = true;
+                    testUtils.console.success('Manual right-click test passed!');
+                    testUtils.updateStatus(true, 'Right-click is fully enabled');
+                }
+            }, { once: true });
+        };
+        
+        // Log all restriction attempts
+        testUtils.console.info('Right-click restrictions applied:');
+        testUtils.console.info('- HTML attribute: oncontextmenu="return false"');
+        testUtils.console.info('- Document listener with capture: true');
+        testUtils.console.info('- Body listener');
+        testUtils.console.info('- Window listener with capture: true');
+    </script>
+</body>
+</html>

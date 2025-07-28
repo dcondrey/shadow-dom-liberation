@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="liberationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shadow DOM container -->
+  <rect x="8" y="8" width="48" height="48" rx="8" fill="url(#liberationGradient)" opacity="0.1" stroke="url(#liberationGradient)" stroke-width="2"/>
+  
+  <!-- Lock being broken -->
+  <g transform="translate(32, 32)">
+    <!-- Lock body -->
+    <rect x="-10" y="-6" width="20" height="16" rx="2" fill="none" stroke="url(#liberationGradient)" stroke-width="3"/>
+    
+    <!-- Lock shackle (broken) -->
+    <path d="M -8 -6 L -8 -12 Q -8 -20 0 -20 Q 8 -20 8 -12 L 8 -8" fill="none" stroke="url(#liberationGradient)" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Break lines -->
+    <path d="M 6 -10 L 10 -14 M 8 -8 L 12 -10 M 10 -6 L 14 -8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Liberation rays -->
+  <g transform="translate(32, 32)">
+    <path d="M 0 -24 L 0 -28 M 17 -17 L 20 -20 M 24 0 L 28 0 M 17 17 L 20 20 M 0 24 L 0 28 M -17 17 L -20 20 M -24 0 L -28 0 M -17 -17 L -20 -20" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>

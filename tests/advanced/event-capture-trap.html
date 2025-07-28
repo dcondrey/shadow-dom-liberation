@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Event Capture Phase Trap</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .event-flow-diagram {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .event-phase {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .capture-phase {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+        
+        .target-phase {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+        
+        .bubble-phase {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+        
+        .event-trap {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f44336;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .event-log {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .event-entry {
+            margin: 2px 0;
+        }
+        
+        .event-entry.blocked {
+            color: #ef5350;
+        }
+        
+        .event-entry.allowed {
+            color: #66bb6a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Event Capture Phase Blocking</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test implements event blocking at the capture phase, which occurs before the event reaches its target.</p>
+        <p><strong>Expected behavior:</strong> The userscript should bypass capture phase blocking and allow normal event propagation.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Events trapped in capture phase
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - Event listeners with capture: true at multiple levels<br>
+        - stopPropagation() and stopImmediatePropagation()<br>
+        - Event delegation trap patterns<br>
+        - Nested capture handlers<br>
+        - Dynamic event rebinding
+    </div>
+    
+    <div class="event-flow-diagram">
+        <h3>Event Flow Visualization:</h3>
+        <div class="event-phase capture-phase">
+            <strong>1. Capture Phase (↓)</strong>
+            <span class="event-trap">TRAP HERE</span>
+            <div>Window → Document → Body → Target</div>
+        </div>
+        <div class="event-phase target-phase">
+            <strong>2. Target Phase</strong>
+            <div>Event reaches target element</div>
+        </div>
+        <div class="event-phase bubble-phase">
+            <strong>3. Bubble Phase (↑)</strong>
+            <div>Target → Body → Document → Window</div>
+        </div>
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Try to interact with this content</h2>
+        
+        <div id="interactionTest" style="background: #fff; padding: 20px; border: 2px solid #ddd; border-radius: 4px;">
+            <p>All events should be trapped before reaching these elements:</p>
+            
+            <button id="testButton" onclick="alert('Button clicked successfully!')">
+                Click Me (Should be blocked)
+            </button>
+            
+            <div style="margin: 20px 0;">
+                <input type="text" id="testInput" placeholder="Try typing here...">
+            </div>
+            
+            <div id="testDiv" style="background: #e3f2fd; padding: 15px; margin: 10px 0; cursor: pointer;">
+                <p>Click or right-click this area</p>
+                <code>CAPTURE-PROTECTED-789</code>
+            </div>
+            
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect width='200' height='100' fill='%239C27B0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='14'%3ECaptured Events%3C/text%3E%3C/svg%3E" 
+                 alt="Event capture test"
+                 id="testImage">
+        </div>
+    </div>
+    
+    <div class="event-log" id="eventLog">
+        <strong>Event Capture Log:</strong><br>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Click the button (should be blocked by capture)<br>
+           2. Type in the input field<br>
+           3. Right-click on the blue area<br>
+           4. Try to drag the image<br>
+           5. Check the event log to see capture blocking<br>
+           6. If events reach their targets, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Log events
+        function logEvent(message, allowed = false) {
+            const log = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `event-entry ${allowed ? 'allowed' : 'blocked'}`;
+            entry.textContent = `[${performance.now().toFixed(2)}ms] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Create capture traps at multiple levels
+        const captureTraps = [
+            { element: window, name: 'Window' },
+            { element: document, name: 'Document' },
+            { element: document.documentElement, name: 'HTML' },
+            { element: document.body, name: 'Body' }
+        ];
+        
+        // Events to trap
+        const trappedEvents = [
+            'click', 'contextmenu', 'mousedown', 'mouseup',
+            'keydown', 'keyup', 'keypress',
+            'selectstart', 'copy', 'paste', 'cut',
+            'dragstart', 'drag', 'dragend',
+            'touchstart', 'touchend'
+        ];
+        
+        // Install capture traps
+        captureTraps.forEach(({ element, name }) => {
+            trappedEvents.forEach(eventType => {
+                // Primary trap
+                element.addEventListener(eventType, function(e) {
+                    if (window.sdlCaptureBypass) return;
+                    
+                    // Check if event is targeting protected content
+                    const path = e.composedPath();
+                    const inProtectedArea = path.some(el => 
+                        el.id === 'testContent' || 
+                        el.id === 'interactionTest' ||
+                        (el.classList && el.classList.contains('test-content'))
+                    );
+                    
+                    if (inProtectedArea) {
+                        logEvent(`${eventType} trapped at ${name} capture phase`);
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        
+                        testUtils.console.log(`Event ${eventType} blocked at ${name} capture`);
+                        return false;
+                    }
+                }, true); // true = capture phase
+                
+                // Secondary trap with immediate stop
+                element.addEventListener(eventType, function(e) {
+                    if (window.sdlCaptureBypass) return;
+                    
+                    if (e.target.closest('#testContent')) {
+                        e.stopImmediatePropagation();
+                        logEvent(`${eventType} immediately stopped at ${name}`);
+                    }
+                }, true);
+            });
+        });
+        
+        // Extra protection on specific elements
+        const protectedElements = [
+            document.getElementById('testButton'),
+            document.getElementById('testInput'),
+            document.getElementById('testDiv'),
+            document.getElementById('testImage')
+        ];
+        
+        protectedElements.forEach(el => {
+            if (!el) return;
+            
+            // Add capture listeners directly
+            ['click', 'contextmenu', 'mousedown'].forEach(eventType => {
+                el.addEventListener(eventType, function(e) {
+                    if (!window.sdlCaptureBypass) {
+                        logEvent(`${eventType} blocked on ${el.id || el.tagName}`);
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                    }
+                }, true);
+            });
+        });
+        
+        // Test event delegation trap
+        document.addEventListener('click', function(e) {
+            if (window.sdlCaptureBypass) return;
+            
+            // Delegation trap - check ancestors
+            let current = e.target;
+            while (current && current !== document) {
+                if (current.id === 'testContent') {
+                    logEvent('Click trapped by delegation pattern');
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return false;
+                }
+                current = current.parentElement;
+            }
+        }, true);
+        
+        // Dynamic event rebinding
+        setInterval(() => {
+            if (!window.sdlCaptureBypass && Math.random() > 0.7) {
+                // Randomly rebind capture listeners
+                const button = document.getElementById('testButton');
+                if (button) {
+                    button.addEventListener('click', function(e) {
+                        if (!window.sdlCaptureBypass) {
+                            e.stopImmediatePropagation();
+                            logEvent('Dynamic capture rebind blocked click');
+                        }
+                    }, true);
+                }
+            }
+        }, 2000);
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking event capture trap bypass...');
+            
+            let captureBypassWorks = false;
+            
+            // Test if events can reach targets
+            const button = document.getElementById('testButton');
+            const testDiv = document.getElementById('testDiv');
+            
+            // Test click propagation
+            const testClickPropagation = () => {
+                return new Promise((resolve) => {
+                    let eventReachedTarget = false;
+                    
+                    // Add target phase listener
+                    const handler = function(e) {
+                        eventReachedTarget = true;
+                        logEvent('Click reached target phase!', true);
+                        button.removeEventListener('click', handler);
+                    };
+                    
+                    button.addEventListener('click', handler);
+                    
+                    // Simulate click
+                    const event = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    
+                    button.dispatchEvent(event);
+                    
+                    setTimeout(() => {
+                        button.removeEventListener('click', handler);
+                        resolve(eventReachedTarget);
+                    }, 100);
+                });
+            };
+            
+            // Test multiple event types
+            testClickPropagation().then(clickWorks => {
+                captureBypassWorks = clickWorks;
+                
+                // Test if capture listeners are still active
+                let captureActive = false;
+                const testHandler = function(e) {
+                    if (e.eventPhase === Event.CAPTURING_PHASE) {
+                        captureActive = true;
+                    }
+                };
+                
+                document.addEventListener('click', testHandler, true);
+                document.body.click();
+                document.removeEventListener('click', testHandler, true);
+                
+                // Update status
+                if (captureBypassWorks) {
+                    testUtils.updateStatus(true, 'Event capture traps bypassed');
+                    window.sdlCaptureBypass = true;
+                } else {
+                    testUtils.updateStatus(false, 'Event capture traps still active');
+                }
+                
+                testUtils.console.info(`Events reach target: ${captureBypassWorks}`);
+                testUtils.console.info(`Capture listeners active: ${captureActive}`);
+            });
+        };
+        
+        // Monitor successful events
+        ['click', 'contextmenu', 'keydown'].forEach(eventType => {
+            document.addEventListener(eventType, function(e) {
+                if (e.target.closest('#testContent') && e.eventPhase === Event.AT_TARGET) {
+                    logEvent(`${eventType} successfully reached target!`, true);
+                    testUtils.console.success(`${eventType} bypassed capture trap!`);
+                    testUtils.updateStatus(true, 'Event capture traps have been bypassed!');
+                    window.sdlCaptureBypass = true;
+                }
+            });
+        });
+        
+        // Log initial state
+        testUtils.console.info(`Installed ${captureTraps.length} capture traps`);
+        testUtils.console.info(`Monitoring ${trappedEvents.length} event types`);
+        logEvent('Event capture traps initialized');
+    </script>
+</body>
+</html>

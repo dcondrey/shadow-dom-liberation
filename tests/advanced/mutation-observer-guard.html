@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: MutationObserver Guard</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .mutation-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .mutation-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .mutation-entry.blocked {
+            color: #f48771;
+        }
+        
+        .mutation-entry.allowed {
+            color: #89d185;
+        }
+        
+        #mutationCount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: MutationObserver Protection Guard</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test uses MutationObserver to actively monitor and restore restrictions that are removed or modified.</p>
+        <p><strong>Expected behavior:</strong> The userscript should bypass the MutationObserver guard and allow normal interactions.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - MutationObserver is guarding
+    </div>
+    
+    <div class="technique-details">
+        <strong>Protection techniques used:</strong><br>
+        - MutationObserver monitoring all DOM changes<br>
+        - Automatic restoration of removed restrictions<br>
+        - Style modification detection and reversal<br>
+        - Attribute change prevention<br>
+        - Real-time restriction enforcement<br>
+        <div style="margin-top: 10px;">
+            Mutations blocked: <span id="mutationCount">0</span>
+        </div>
+    </div>
+    
+    <div class="test-content" id="testContent" 
+         oncontextmenu="return false" 
+         onselectstart="return false"
+         style="user-select: none; -webkit-user-select: none;">
+        
+        <h2>Heavily Guarded Content</h2>
+        
+        <p class="protected-text" style="user-select: none !important;">
+            This text is protected by MutationObserver. Any attempt to modify the DOM 
+            to enable selection will be detected and reversed immediately.
+        </p>
+        
+        <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 4px;">
+            <h3>Protected Data</h3>
+            <code style="user-select: none;">MUTATION-PROTECTED-123</code>
+            <p style="user-select: none;">The MutationObserver will restore any removed restrictions.</p>
+        </div>
+        
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%232196F3'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='16'%3EMutation Protected%3C/text%3E%3C/svg%3E" 
+             alt="Protected image" 
+             draggable="false"
+             oncontextmenu="return false"
+             style="-webkit-user-drag: none;">
+        
+        <button onclick="testManualBypass()">Test Manual Bypass</button>
+    </div>
+    
+    <div class="mutation-log" id="mutationLog">
+        <strong>MutationObserver Activity Log:</strong><br>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to select text (observer will block changes)<br>
+           2. Right-click on content<br>
+           3. Open DevTools and try to modify attributes<br>
+           4. Click "Test Manual Bypass" to see observer in action<br>
+           5. If interactions work despite the observer, test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        let mutationCount = 0;
+        let observerActive = true;
+        
+        // Log mutations
+        function logMutation(message, blocked = true) {
+            const log = document.getElementById('mutationLog');
+            const entry = document.createElement('div');
+            entry.className = `mutation-entry ${blocked ? 'blocked' : 'allowed'}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            
+            // Keep log scrolled to bottom
+            log.scrollTop = log.scrollHeight;
+            
+            if (blocked) {
+                mutationCount++;
+                document.getElementById('mutationCount').textContent = mutationCount;
+            }
+        }
+        
+        // Create the main MutationObserver
+        const guardObserver = new MutationObserver(function(mutations) {
+            if (!observerActive || window.sdlObserverBypassed) return;
+            
+            mutations.forEach(function(mutation) {
+                // Monitor attribute changes
+                if (mutation.type === 'attributes') {
+                    const target = mutation.target;
+                    const attr = mutation.attributeName;
+                    
+                    // Check for restriction removal
+                    if (attr === 'oncontextmenu' && !target.hasAttribute('oncontextmenu')) {
+                        target.setAttribute('oncontextmenu', 'return false');
+                        logMutation(`Restored oncontextmenu on ${target.tagName}`);
+                        testUtils.console.log('MutationObserver: Restored oncontextmenu');
+                    }
+                    
+                    if (attr === 'onselectstart' && !target.hasAttribute('onselectstart')) {
+                        target.setAttribute('onselectstart', 'return false');
+                        logMutation(`Restored onselectstart on ${target.tagName}`);
+                        testUtils.console.log('MutationObserver: Restored onselectstart');
+                    }
+                    
+                    if (attr === 'draggable' && target.draggable !== false) {
+                        target.draggable = false;
+                        logMutation(`Restored draggable=false on ${target.tagName}`);
+                    }
+                    
+                    // Monitor style changes
+                    if (attr === 'style') {
+                        const style = target.style;
+                        
+                        // Check user-select
+                        if (style.userSelect !== 'none') {
+                            style.userSelect = 'none';
+                            style.webkitUserSelect = 'none';
+                            style.mozUserSelect = 'none';
+                            style.msUserSelect = 'none';
+                            logMutation(`Restored user-select: none on ${target.tagName}`);
+                            testUtils.console.log('MutationObserver: Restored user-select');
+                        }
+                        
+                        // Check user-drag
+                        if (style.webkitUserDrag !== 'none') {
+                            style.webkitUserDrag = 'none';
+                            logMutation(`Restored user-drag: none on ${target.tagName}`);
+                        }
+                    }
+                }
+                
+                // Monitor node removal
+                mutation.removedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        logMutation(`Node removed: ${node.tagName || 'unknown'}`);
+                        
+                        // Restore critical elements
+                        if (node.id === 'testContent') {
+                            logMutation('Critical content removed - restoring!');
+                            mutation.target.appendChild(node);
+                        }
+                    }
+                });
+                
+                // Monitor node additions (potential bypass attempts)
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        // Check if it's a potential bypass element
+                        if (node.tagName === 'STYLE' || node.tagName === 'SCRIPT') {
+                            logMutation(`Suspicious ${node.tagName} element added`);
+                            
+                            // Scan for bypass attempts
+                            if (node.tagName === 'STYLE' && node.textContent.includes('user-select')) {
+                                logMutation('Style bypass attempt detected!');
+                                node.remove();
+                            }
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Start observing
+        guardObserver.observe(document.body, {
+            attributes: true,
+            attributeOldValue: true,
+            childList: true,
+            subtree: true,
+            attributeFilter: ['style', 'oncontextmenu', 'onselectstart', 'draggable', 'ondragstart']
+        });
+        
+        // Secondary observer for the document element
+        const documentObserver = new MutationObserver(function(mutations) {
+            if (!observerActive || window.sdlObserverBypassed) return;
+            
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'STYLE') {
+                            logMutation('Global style element added to document');
+                        }
+                    });
+                }
+            });
+        });
+        
+        documentObserver.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Test manual bypass button
+        function testManualBypass() {
+            testUtils.console.info('Testing manual bypass...');
+            
+            // Try to remove restrictions
+            document.body.removeAttribute('oncontextmenu');
+            document.body.removeAttribute('onselectstart');
+            document.body.style.userSelect = 'auto';
+            
+            // Try to modify test content
+            const content = document.getElementById('testContent');
+            content.style.userSelect = 'auto';
+            content.removeAttribute('oncontextmenu');
+            
+            testUtils.console.info('Manual bypass attempted - check if observer blocked it');
+        }
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking MutationObserver guard bypass...');
+            
+            // Test if observer can be disabled
+            let observerBypassed = false;
+            
+            // Method 1: Check if restrictions stay removed
+            setTimeout(() => {
+                const testElement = document.getElementById('testContent');
+                const originalStyle = testElement.style.userSelect;
+                
+                // Try to change
+                testElement.style.userSelect = 'auto';
+                
+                // Check if it sticks
+                setTimeout(() => {
+                    if (testElement.style.userSelect === 'auto') {
+                        observerBypassed = true;
+                        testUtils.console.success('MutationObserver bypass successful!');
+                        window.sdlObserverBypassed = true;
+                    } else {
+                        testUtils.console.log('MutationObserver still active');
+                    }
+                    
+                    // Test other aspects
+                    const hasContextMenu = testElement.hasAttribute('oncontextmenu');
+                    const hasSelectStart = testElement.hasAttribute('onselectstart');
+                    const canSelect = window.getComputedStyle(testElement).userSelect !== 'none';
+                    
+                    if (observerBypassed || (!hasContextMenu && !hasSelectStart && canSelect)) {
+                        testUtils.updateStatus(true, 'MutationObserver guard bypassed');
+                    } else {
+                        testUtils.updateStatus(false, 'MutationObserver still guarding');
+                    }
+                    
+                    // Log status
+                    testUtils.console.info(`Observer bypassed: ${observerBypassed}`);
+                    testUtils.console.info(`Restrictions removed: ${!hasContextMenu && !hasSelectStart}`);
+                    testUtils.console.info(`Selection enabled: ${canSelect}`);
+                    
+                }, 500);
+            }, 1000);
+        };
+        
+        // Monitor for successful selection
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection().toString();
+            if (selection.length > 0) {
+                logMutation('Text selection detected!', false);
+                testUtils.console.success('Selection works despite MutationObserver!');
+                testUtils.updateStatus(true, 'MutationObserver guard has been bypassed!');
+                window.sdlObserverBypassed = true;
+            }
+        });
+        
+        // Monitor for successful right-click
+        document.addEventListener('contextmenu', function(e) {
+            if (!e.defaultPrevented) {
+                logMutation('Context menu event allowed!', false);
+                testUtils.console.success('Right-click works despite MutationObserver!');
+            }
+        });
+        
+        testUtils.console.info('MutationObserver guard is active and monitoring...');
+    </script>
+</body>
+</html>

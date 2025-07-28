@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Drag Operations Disabled</title>
+    <link rel="stylesheet" href="../test-common.css">
+    <style>
+        .no-drag {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+        
+        .drag-target {
+            border: 2px dashed #999;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            background: #f9f9f9;
+            min-height: 100px;
+        }
+        
+        .drag-target.dragover {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+    </style>
+</head>
+<body ondragstart="return false" ondrop="return false">
+    <h1>Test: Drag Operations Disabled</h1>
+    
+    <div class="test-info">
+        <h3>What this tests:</h3>
+        <p>This test verifies that the Shadow DOM Liberation script can bypass drag operation restrictions on images, links, and text.</p>
+        <p><strong>Expected behavior:</strong> You should be able to drag images, links, and selected text.</p>
+    </div>
+    
+    <div class="status restricted" id="status">
+        ❌ Restriction Active - Drag operations are disabled
+    </div>
+    
+    <div class="technique-details">
+        <strong>Restriction techniques used:</strong><br>
+        - ondragstart="return false" attribute<br>
+        - CSS -webkit-user-drag: none<br>
+        - draggable="false" on images<br>
+        - JavaScript event listeners preventing drag<br>
+        - Multiple vendor prefixes for compatibility
+    </div>
+    
+    <div class="test-content" id="testContent">
+        <h2>Try to drag these elements</h2>
+        
+        <div style="margin: 20px 0;">
+            <h3>1. Images</h3>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%232196F3'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='16'%3EDrag Me!%3C/text%3E%3C/svg%3E" 
+                 alt="Draggable test image 1" 
+                 class="test-image no-drag"
+                 draggable="false"
+                 ondragstart="return false">
+            
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%234CAF50'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='16'%3EDrag This Too!%3C/text%3E%3C/svg%3E" 
+                 alt="Draggable test image 2" 
+                 class="test-image no-drag"
+                 draggable="false">
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>2. Links</h3>
+            <p>
+                <a href="#test1" class="no-drag" draggable="false" ondragstart="return false">
+                    📎 Drag this link to test
+                </a>
+            </p>
+            <p>
+                <a href="#test2" class="no-drag" draggable="false">
+                    🔗 Another draggable link for testing
+                </a>
+            </p>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>3. Text Selection</h3>
+            <p class="no-drag" ondragstart="return false">
+                Select and drag this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                You should be able to select this text and drag it to another application or the target area below.
+            </p>
+        </div>
+        
+        <div class="drag-target" id="dropZone">
+            <p>Drop items here to test drag functionality</p>
+            <p id="dropResult" style="margin-top: 10px; font-weight: bold;"></p>
+        </div>
+    </div>
+    
+    <div class="test-actions">
+        <p><strong>How to test:</strong></p>
+        <p>1. Try to drag the images above<br>
+           2. Try to drag the links<br>
+           3. Select some text and try to drag it<br>
+           4. Try dropping items in the drop zone<br>
+           5. If drag operations work, the test passes ✅</p>
+    </div>
+    
+    <div id="console-output" class="console-output"></div>
+    
+    <script src="../test-common.js"></script>
+    <script>
+        // Block dragstart events
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            testUtils.console.log('Dragstart blocked by document listener');
+            return false;
+        }, true);
+        
+        // Block drag events
+        document.addEventListener('drag', function(e) {
+            e.preventDefault();
+            testUtils.console.log('Drag blocked by document listener');
+            return false;
+        }, true);
+        
+        // Block on specific elements
+        document.querySelectorAll('img, a').forEach(element => {
+            element.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                testUtils.console.log(`Dragstart blocked on ${element.tagName}`);
+                return false;
+            });
+            
+            // Set draggable to false programmatically
+            element.draggable = false;
+            element.setAttribute('draggable', 'false');
+        });
+        
+        // Apply CSS drag restrictions programmatically
+        const style = document.createElement('style');
+        style.textContent = `
+            #testContent * {
+                -webkit-user-drag: none !important;
+                -khtml-user-drag: none !important;
+                -moz-user-drag: none !important;
+                -o-user-drag: none !important;
+                user-drag: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Setup drop zone (should work even with restrictions)
+        const dropZone = document.getElementById('dropZone');
+        const dropResult = document.getElementById('dropResult');
+        
+        ['dragover', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+            });
+        });
+        
+        dropZone.addEventListener('dragenter', function(e) {
+            this.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', function(e) {
+            this.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            let dropped = '';
+            if (e.dataTransfer.files.length > 0) {
+                dropped = `Dropped ${e.dataTransfer.files.length} file(s)`;
+            } else if (e.dataTransfer.getData('text/plain')) {
+                dropped = `Dropped text: "${e.dataTransfer.getData('text/plain').substring(0, 50)}..."`;
+            } else if (e.dataTransfer.getData('text/html')) {
+                dropped = 'Dropped HTML content';
+            } else {
+                dropped = 'Something was dropped!';
+            }
+            
+            dropResult.textContent = dropped;
+            testUtils.console.success(dropped);
+            testUtils.updateStatus(true, 'Drag and drop is working!');
+        });
+        
+        // Override the checkRestrictionBypassed function
+        window.checkRestrictionBypassed = function() {
+            testUtils.console.info('Checking drag restriction bypass...');
+            
+            let dragEnabled = false;
+            const testImg = document.querySelector('img');
+            const testLink = document.querySelector('a');
+            
+            // Check draggable attribute
+            const imgDraggable = testImg.draggable !== false;
+            const linkDraggable = testLink.draggable !== false;
+            
+            // Check CSS user-drag
+            const imgStyle = window.getComputedStyle(testImg);
+            const cssUserDrag = imgStyle.webkitUserDrag !== 'none' && 
+                                imgStyle.userDrag !== 'none';
+            
+            // Test drag programmatically
+            const testDragStart = (element) => {
+                return new Promise((resolve) => {
+                    let dragStarted = false;
+                    
+                    const handler = (e) => {
+                        if (!e.defaultPrevented) {
+                            dragStarted = true;
+                        }
+                        element.removeEventListener('dragstart', handler);
+                        resolve(dragStarted);
+                    };
+                    
+                    element.addEventListener('dragstart', handler);
+                    
+                    // Simulate dragstart
+                    const event = new DragEvent('dragstart', {
+                        bubbles: true,
+                        cancelable: true,
+                        dataTransfer: new DataTransfer()
+                    });
+                    
+                    element.dispatchEvent(event);
+                    
+                    setTimeout(() => {
+                        element.removeEventListener('dragstart', handler);
+                        resolve(dragStarted);
+                    }, 100);
+                });
+            };
+            
+            // Test both image and link
+            Promise.all([
+                testDragStart(testImg),
+                testDragStart(testLink)
+            ]).then(([imgDrag, linkDrag]) => {
+                dragEnabled = imgDrag || linkDrag;
+                
+                // Check attribute restrictions
+                const bodyDragBlocked = document.body.hasAttribute('ondragstart');
+                
+                // Determine overall status
+                if (dragEnabled && imgDraggable && linkDraggable) {
+                    testUtils.updateStatus(true, 'Drag operations fully enabled');
+                } else if (dragEnabled || imgDraggable || linkDraggable) {
+                    testUtils.updateStatus('partial', 'Some drag operations work');
+                } else {
+                    testUtils.updateStatus(false, 'Drag operations still blocked');
+                }
+                
+                // Log detailed results
+                testUtils.console.info(`Image draggable: ${imgDraggable}`);
+                testUtils.console.info(`Link draggable: ${linkDraggable}`);
+                testUtils.console.info(`CSS user-drag: ${cssUserDrag ? 'enabled' : 'disabled'}`);
+                testUtils.console.info(`Programmatic drag: ${dragEnabled ? 'works' : 'blocked'}`);
+                testUtils.console.info(`ondragstart attribute: ${bodyDragBlocked ? 'present' : 'removed'}`);
+            });
+        };
+        
+        // Monitor successful drag events
+        document.addEventListener('dragstart', function(e) {
+            if (!e.defaultPrevented) {
+                const element = e.target;
+                testUtils.console.success(`Drag started on ${element.tagName}: ${element.alt || element.textContent || 'element'}`);
+                testUtils.updateStatus(true, 'Drag operations are working!');
+            }
+        });
+    </script>
+</body>
+</html>
