@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" rx="8" fill="#1a1a2e"/>
+  
+  <!-- Shadow DOM (locked) -->
+  <g opacity="0.5">
+    <rect x="8" y="16" width="20" height="20" rx="2" fill="#0f0f23" stroke="#4a4a6a" stroke-width="1"/>
+    <rect x="11" y="19" width="14" height="2" fill="#4a4a6a"/>
+    <rect x="11" y="23" width="10" height="2" fill="#4a4a6a"/>
+    <rect x="11" y="27" width="12" height="2" fill="#4a4a6a"/>
+  </g>
+  
+  <!-- Breaking chain -->
+  <path d="M 28 26 L 36 26" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-dasharray="3,2"/>
+  
+  <!-- Liberation burst -->
+  <circle cx="32" cy="26" r="3" fill="#ffd93d" opacity="0.8"/>
+  
+  <!-- Free DOM -->
+  <g>
+    <rect x="36" y="16" width="20" height="20" rx="2" fill="#f8f9fa" stroke="#4ecdc4" stroke-width="1.5"/>
+    <rect x="39" y="19" width="14" height="2" fill="#4ecdc4"/>
+    <rect x="39" y="23" width="10" height="2" fill="#4ecdc4"/>
+    <rect x="39" y="27" width="12" height="2" fill="#4ecdc4"/>
+    
+    <!-- Cursor indicator -->
+    <rect x="49" y="22" width="1" height="4" fill="#4ecdc4"/>
+  </g>
+  
+  <!-- Simple sparkles -->
+  <circle cx="50" cy="20" r="1" fill="#ffd93d"/>
+  <circle cx="45" cy="30" r="1" fill="#ffd93d"/>
+  
+  <!-- Compact text -->
+  <text x="32" y="48" font-family="Arial, sans-serif" font-size="8" font-weight="bold" text-anchor="middle" fill="#4ecdc4">SDL</text>
+</svg>
