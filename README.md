@@ -1,12 +1,14 @@
-# Shadow DOM Liberation
+<!-- repo-header:start -->
+<img src="https://github.com/dcondrey.png?size=160" alt="Shadow DOM Liberation logo" width="120" align="left">
 
-[![CI](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml/badge.svg)](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Userscript](https://img.shields.io/badge/Userscript-Install-green.svg)](https://github.com/dcondrey/shadow-dom-liberation/raw/main/shadow-dom-liberation.user.js)
-[![GitHub issues](https://img.shields.io/github/issues/dcondrey/shadow-dom-liberation)](https://github.com/dcondrey/shadow-dom-liberation/issues)
-[![GitHub stars](https://img.shields.io/github/stars/dcondrey/shadow-dom-liberation)](https://github.com/dcondrey/shadow-dom-liberation/stargazers)
+<h1>Shadow DOM Liberation</h1>
 
-A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.
+<p><strong>A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.</strong></p>
+
+<br clear="left">
+
+[![CI](https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?style=flat-square&labelColor=20232a&branch=main&label=CI)](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml) [![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](.bestpractices.json) [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-6a4c93?style=flat-square&labelColor=20232a)](https://github.com/dcondrey/shadow-dom-liberation/blob/main/CODE_OF_CONDUCT.md) [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?style=flat-square&labelColor=20232a)](https://github.com/sponsors/dcondrey)
+<!-- repo-header:end -->
 
 ## Quick Install
 

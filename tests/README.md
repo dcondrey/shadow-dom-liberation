@@ -1,4 +1,14 @@
-# Shadow DOM Liberation Test Suite
+<!-- repo-header:start -->
+<img src="https://github.com/dcondrey.png?size=160" alt="Shadow DOM Liberation Test Suite logo" width="120" align="left">
+
+<h1>Shadow DOM Liberation Test Suite</h1>
+
+<p><strong>Documentation for Shadow DOM Liberation Test Suite in Shadow Dom Liberation.</strong></p>
+
+<br clear="left">
+
+[![CI](https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?style=flat-square&labelColor=20232a&branch=main&label=CI)](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml) [![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](../.bestpractices.json) [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-6a4c93?style=flat-square&labelColor=20232a)](https://github.com/dcondrey/shadow-dom-liberation/blob/main/CODE_OF_CONDUCT.md) [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?style=flat-square&labelColor=20232a)](https://github.com/sponsors/dcondrey)
+<!-- repo-header:end -->
 
 This comprehensive test suite helps verify that the Shadow DOM Liberation userscript successfully bypasses various content restriction techniques.
 
