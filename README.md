@@ -1,14 +1,17 @@
 <!-- repo-header:start -->
-<img src="https://github.com/dcondrey.png?size=160" alt="Shadow DOM Liberation logo" width="120" align="left">
+<h3 align="center">Shadow DOM Liberation</h3>
 
-<h1>Shadow DOM Liberation</h1>
+<p align="center"><strong>A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.</strong></p>
 
-<p><strong>A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.</strong></p>
-
-<br clear="left">
-
-[![CI](https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?style=flat-square&labelColor=20232a&branch=main&label=CI)](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml) [![Best Practices Evidence](https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a)](.bestpractices.json) [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-6a4c93?style=flat-square&labelColor=20232a)](https://github.com/dcondrey/shadow-dom-liberation/blob/main/CODE_OF_CONDUCT.md) [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?style=flat-square&labelColor=20232a)](https://github.com/sponsors/dcondrey)
+<p align="center">
+  <a href="https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?style=flat-square&labelColor=20232a&branch=main&label=CI" alt="CI"></a>
+  <a href=".bestpractices.json"><img src="https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a" alt="Best Practices Evidence"></a>
+  <a href="https://github.com/dcondrey/shadow-dom-liberation/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-6a4c93?style=flat-square&labelColor=20232a" alt="Code of Conduct"></a>
+  <a href="https://github.com/sponsors/dcondrey"><img src="https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?style=flat-square&labelColor=20232a" alt="GitHub Sponsors"></a>
+</p>
 <!-- repo-header:end -->
+
+---
 
 ## Quick Install
 
