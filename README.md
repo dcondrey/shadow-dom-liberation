@@ -1,17 +1,11 @@
-<!-- repo-header:start -->
-<h3 align="center">Shadow DOM Liberation</h3>
+### Shadow DOM Liberation
 
-<p align="center"><strong>A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.</strong></p>
+<img align="left" width="96" alt="Shadow DOM Liberation logo" src="icons/icon.svg">
+A sophisticated userscript that transparently removes web restrictions while maintaining complete behavioral fidelity to the original page.
 
-<p align="center">
-  <a href="https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?style=flat-square&labelColor=20232a&branch=main&label=CI" alt="CI"></a>
-  <a href=".bestpractices.json"><img src="https://img.shields.io/badge/best%20practices-evidence%20reviewed-6a4c93?style=flat-square&labelColor=20232a" alt="Best Practices Evidence"></a>
-  <a href="https://github.com/dcondrey/shadow-dom-liberation/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-6a4c93?style=flat-square&labelColor=20232a" alt="Code of Conduct"></a>
-  <a href="https://github.com/sponsors/dcondrey"><img src="https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?style=flat-square&labelColor=20232a" alt="GitHub Sponsors"></a>
-</p>
-<!-- repo-header:end -->
+<br clear="left">
 
----
+[![CI](https://img.shields.io/github/actions/workflow/status/dcondrey/shadow-dom-liberation/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/dcondrey/shadow-dom-liberation/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/dcondrey/shadow-dom-liberation?style=flat-square)](https://github.com/dcondrey/shadow-dom-liberation/releases)
 
 ## Quick Install
 
